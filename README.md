@@ -2,4 +2,4 @@
 
 # copyright by Amirul Putra Justicia
 # Yogyakarta
-# Web Developer cupu
+# Web Developer
