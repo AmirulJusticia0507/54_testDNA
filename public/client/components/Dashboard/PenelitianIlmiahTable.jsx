@@ -85,7 +85,7 @@ function PenelitianIlmiahTable() {
 
     // simpan data ke dalam tabel penelitian_ilmiah menggunakan AJAX
     axios
-      .post("/simpan_data.php", {
+      .post("/penelitian-ilmiah", {
         nama,
         usia,
         jenis_kelamin: jenisKelamin,

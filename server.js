@@ -40,13 +40,13 @@
 // });
 // Import dependencies
 const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const cors = require('cors');
+const sequelize = require('./db');
+require('dotenv').config();
 
 // Import routes
 const userRoutes = require('./routes/userRoutes');
-const korbanBencanaRoutes = require('./routes/korbanBencanaRoutes');
+const korbanBencanaRoutes = require('./routes/identifikasiKorbanBencanaRoutes');
 const penyakitGenetikRoutes = require('./routes/penyakitGenetikRoutes');
 const keturunanRoutes = require('./routes/keturunanRoutes');
 const pasanganHidupRoutes = require('./routes/pasanganHidupRoutes');
@@ -57,23 +57,14 @@ const peningkatanKinerjaAtletikRoutes = require('./routes/peningkatanKinerjaAtle
 const app = express();
 
 // Set up middleware
-app.use(bodyParser.json());
 app.use(cors());
 app.use(express.json());
 
-// Set up database connection
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-});
-
-mongoose.connection.on('connected', () => {
-    console.log('Connected to MongoDB database');
-});
-
-mongoose.connection.on('error', (error) => {
-    console.log(`MongoDB connection error: ${error}`);
-});
+// Connect PostgreSQL and create tables when they do not exist.
+sequelize.authenticate()
+    .then(() => sequelize.sync())
+    .then(() => console.log('Connected to PostgreSQL database'))
+    .catch((error) => console.error(`PostgreSQL connection error: ${error.message}`));
 
 // Set up routes
 app.use('/users', userRoutes);

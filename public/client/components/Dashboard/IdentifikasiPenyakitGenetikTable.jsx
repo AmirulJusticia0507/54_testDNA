@@ -83,7 +83,7 @@ const IdentifikasiPenyakitGenetikTable = () => {
       const kemungkinanKelainanGenetik = jumlahMutasi / dataDNA.length;
 
       // simpan data ke dalam tabel identifikasi_penyakit_genetik
-      const result = await axios.post('/api/identifikasi_penyakit_genetik', {
+      const result = await axios.post('/penyakit-genetik', {
         nama,
         usia,
         jenis_kelamin: jenisKelamin,
@@ -91,7 +91,7 @@ const IdentifikasiPenyakitGenetikTable = () => {
         kemungkinan_kelainan_genetik: kemungkinanKelainanGenetik,
       });
 
-      if (result.status === 200) {
+      if (result.status === 201) {
         // simpan hasil perhitungan kemungkinan kelainan genetik ke dalam state
         setKemungkinanKelainan(kemungkinanKelainanGenetik.toFixed(2));
         setIsSaved(true);

@@ -56,7 +56,7 @@ function IdentifikasiKorbanBencanaTable() {
   const [keterangan, setKeterangan] = useState("");
   const [isSaved, setIsSaved] = useState(false);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     //lakukan proses identifikasi korban bencana berdasarkan data yang diberikan
@@ -70,9 +70,16 @@ function IdentifikasiKorbanBencanaTable() {
       setKeterangan(`Korban bencana ${nama} tidak membutuhkan penanganan khusus.`);
     }
 
-    //simpan data ke dalam tabel identifikasi_korban_bencana
-    //Untuk melakukan simpan data ini Anda membutuhkan skrip untuk menghubungkan dengan database Anda.
-    setIsSaved(true);
+    try {
+      await fetch('/korban-bencana', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nama, umur: Number(umur), jenis_kelamin: jenisKelamin, kondisi_kesehatan: kondisiKesehatan }),
+      });
+      setIsSaved(true);
+    } catch (error) {
+      console.error('Gagal menyimpan data korban bencana:', error);
+    }
   }
 
   return (

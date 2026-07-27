@@ -8,7 +8,7 @@ const peningkatanKinerjaAtletikController = require('../controllers/peningkatanK
 router.get('/', peningkatanKinerjaAtletikController.getAll);
 router.get('/:id', peningkatanKinerjaAtletikController.getById);
 router.post('/', peningkatanKinerjaAtletikController.create);
-router.put('/:id', peningkatanKinerjaAtletikController.update);
-router.delete('/:id', peningkatanKinerjaAtletikController.delete);
+router.put('/:id', peningkatanKinerjaAtletikController.updateById);
+router.delete('/:id', peningkatanKinerjaAtletikController.deleteById);
 
 module.exports = router;

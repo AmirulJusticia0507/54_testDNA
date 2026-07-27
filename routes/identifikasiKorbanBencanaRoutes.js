@@ -4,15 +4,16 @@ const router = express.Router();
 const identifikasiKorbanBencanaController = require('../controllers/identifikasiKorbanBencanaController');
 
 // Endpoint untuk mendapatkan daftar korban bencana
-router.get('/korban-bencana', identifikasiKorbanBencanaController.getKorbanBencana);
+router.get('/', identifikasiKorbanBencanaController.getAll);
+router.get('/:id', identifikasiKorbanBencanaController.getById);
 
 // Endpoint untuk menambahkan korban bencana baru
-router.post('/korban-bencana', identifikasiKorbanBencanaController.addKorbanBencana);
+router.post('/', identifikasiKorbanBencanaController.create);
 
 // Endpoint untuk mengubah data korban bencana
-router.put('/korban-bencana/:id', identifikasiKorbanBencanaController.updateKorbanBencana);
+router.put('/:id', identifikasiKorbanBencanaController.updateById);
 
 // Endpoint untuk menghapus data korban bencana
-router.delete('/korban-bencana/:id', identifikasiKorbanBencanaController.deleteKorbanBencana);
+router.delete('/:id', identifikasiKorbanBencanaController.deleteById);
 
 module.exports = router;

@@ -10,7 +10,7 @@ const userController = {};
 userController.register = async(req, res) => {
     try {
         // Check if user with the same email already exists
-        const emailExist = await User.findOne({ email: req.body.email });
+        const emailExist = await User.findOne({ where: { email: req.body.email } });
         if (emailExist) {
             return res.status(400).json({ error: 'Email already exists' });
         }
@@ -20,14 +20,11 @@ userController.register = async(req, res) => {
         const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
         // Create new user
-        const user = new User({
+        const user = await User.create({
             name: req.body.name,
             email: req.body.email,
             password: hashedPassword,
         });
-
-        // Save user to database
-        const savedUser = await user.save();
 
         res.status(201).json({ message: 'User created successfully' });
     } catch (error) {
@@ -39,7 +36,7 @@ userController.register = async(req, res) => {
 userController.login = async(req, res) => {
     try {
         // Check if user with the email exists
-        const user = await User.findOne({ email: req.body.email });
+        const user = await User.findOne({ where: { email: req.body.email } });
         if (!user) {
             return res.status(400).json({ error: 'Email or password is wrong' });
         }
