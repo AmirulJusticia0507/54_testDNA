@@ -20,8 +20,9 @@ const resources = {
     title: 'Keturunan', endpoint: '/keturunan',
     fields: [
       ['nama', 'Nama', 'text'], ['usia', 'Usia', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
-      ['nama_ayah', 'Nama ayah', 'text'], ['nama_ibu', 'Nama ibu', 'text'], ['genotipe_ayah', 'Genotipe ayah (AA/Aa/aa)', 'text'], ['genotipe_ibu', 'Genotipe ibu (AA/Aa/aa)', 'text']
-    ], results: [['hasil_punnett', 'Hasil Punnett square']]
+      ['nama_ayah', 'Nama ayah', 'text'], ['nama_ibu', 'Nama ibu', 'text'], ['pola_pewarisan', 'Pola pewarisan', 'text', 'Autosomal dominan / Autosomal resesif / X-linked recessive'],
+      ['jenis_kelamin_anak', 'Jenis kelamin anak', 'text', 'Laki-laki / Perempuan'], ['genotipe_ayah', 'Genotipe ayah', 'text', 'AA/Aa/aa atau XAY/XaY'], ['genotipe_ibu', 'Genotipe ibu', 'text', 'AA/Aa/aa atau XAXA/XAXa/XaXa']
+    ], results: [['kemungkinan_normal', 'Normal (%)'], ['kemungkinan_carrier', 'Carrier (%)'], ['kemungkinan_terdampak', 'Terdampak (%)'], ['hasil_punnett', 'Hasil Mendel']]
   },
   pasangan: {
     title: 'Pasangan Hidup', endpoint: '/pasangan-hidup',
@@ -43,6 +44,14 @@ const resources = {
       ['nama', 'Nama', 'text'], ['usia', 'Usia', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
       ['nilai_awal', 'Nilai awal', 'number'], ['nilai_akhir', 'Nilai akhir', 'number']
     ], results: [['peningkatan_kinerja', 'Peningkatan (%)']]
+  },
+  variant: {
+    title: 'Variant Assessment', endpoint: '/variant-assessments',
+    fields: [
+      ['sample_name', 'Nama sampel', 'text'], ['gene', 'Gen', 'text'], ['variant_notation', 'Notasi varian', 'text', 'Contoh: c.123A>G'], ['variant_type', 'Tipe varian', 'text'],
+      ['coverage', 'Coverage', 'number'], ['base_quality', 'Base quality', 'number'], ['maf', 'MAF (0–1)', 'number'],
+      ['sanger_status', 'Status Sanger', 'text', 'Terkonfirmasi / Tidak terkonfirmasi / Belum diuji'], ['segregation_status', 'Segregasi keluarga', 'text', 'De novo / Cosegregate / Belum diuji'], ['phenotype_match', 'Kecocokan fenotipe', 'text', 'Sesuai / Tidak sesuai / Belum dinilai']
+    ], results: [['skor_bukti', 'Skor bukti'], ['status_review', 'Status review'], ['klasifikasi_simulasi', 'Catatan']]
   }
 }
 
@@ -189,7 +198,7 @@ onMounted(() => { resetForm(); load() })
         <div class="space-y-4">
           <label v-for="field in config.fields" :key="field[0]" class="block text-sm font-medium text-slate-700">
             {{ field[1] }}
-            <input v-model="form[field[0]]" :type="field[2]" :required="field[0] === 'nama'"
+            <input v-model="form[field[0]]" :type="field[2]" :placeholder="field[3] || ''" :required="['nama', 'sample_name', 'gene', 'variant_notation'].includes(field[0])"
               class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" />
           </label>
         </div>
