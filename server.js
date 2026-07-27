@@ -13,6 +13,10 @@ const pasanganHidupRoutes = require('./routes/pasanganHidupRoutes');
 const penelitianIlmiahRoutes = require('./routes/penelitianIlmiahRoutes');
 const peningkatanKinerjaAtletikRoutes = require('./routes/peningkatanKinerjaAtletikRoutes');
 const variantAssessmentRoutes = require('./routes/variantAssessmentRoutes');
+const errorHandler = require("./middleware/errorHandler");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./config/swagger");
+
 
 // Create app instance
 const app = express();
@@ -20,6 +24,29 @@ const app = express();
 // Set up middleware
 app.use(cors());
 app.use(express.json());
+
+// Route tidak ditemukan
+app.use((req, res, next) => {
+    const error = new Error("Route not found");
+    error.statusCode = 404;
+    next(error);
+});
+
+app.use(
+    "/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec)
+);
+
+app.use(errorHandler);
+
+app.get("/", (req, res) => {
+    res.json({
+        status: "OK",
+        service: "DNA Analysis API",
+        version: "1.0.0"
+    });
+});
 
 // Connect MySQL and create tables when they do not exist.
 sequelize.authenticate()
