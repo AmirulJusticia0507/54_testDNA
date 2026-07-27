@@ -76,19 +76,12 @@ function PeningkatanKinerjaAtletikTable() {
     const peningkatanKinerja = ((nilaiAkhir - nilaiAwal) / nilaiAwal) * 100;
 
     // simpan data ke dalam tabel peningkatan_kinerja_atletik
-    const formData = new FormData();
-    formData.append('nama', nama);
-    formData.append('usia', usia);
-    formData.append('jenis_kelamin', jenisKelamin);
-    formData.append('nilai_awal', nilaiAwal);
-    formData.append('nilai_akhir', nilaiAkhir);
-    formData.append('peningkatan_kinerja', peningkatanKinerja);
-
-    fetch('proses.php', {
+    fetch('/peningkatan-kinerja-atletik', {
       method: 'POST',
-      body: formData,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nama, usia: Number(usia), jenis_kelamin: jenisKelamin, nilai_awal: Number(nilaiAwal), nilai_akhir: Number(nilaiAkhir), peningkatan_kinerja: String(peningkatanKinerja) }),
     })
-      .then((response) => response.text())
+      .then((response) => response.json())
       .then((data) => {
         console.log(data);
       })

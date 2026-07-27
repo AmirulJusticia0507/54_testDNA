@@ -45,6 +45,7 @@
 
 // export default KeturunanTable;
 import React, { useState } from 'react';
+import axios from 'axios';
 
 function KeturunanTable() {
   const [nama, setNama] = useState('');
@@ -65,7 +66,7 @@ function KeturunanTable() {
     return kemungkinanGen;
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const genOrangTua = ['A', 'A', 'a', 'a'];
     const kemungkinanGen = hitungKemungkinanGenDariOrangTua(genOrangTua, inputKeturunan);
@@ -77,11 +78,22 @@ function KeturunanTable() {
       setJenisInheritance("Mungkin terjadi");
     }
 
-    // Simpan data ke dalam tabel keturunan
-    // Silakan tambahkan kode untuk menyimpan data ke dalam tabel keturunan di sini
+    try {
+      await axios.post('/keturunan', {
+        nama,
+        usia: Number(usia),
+        jenis_kelamin: jenisKelamin,
+        input_keturunan: inputKeturunan,
+        kemungkinan_gen: kemungkinanGen,
+        jenis_inheritance: kemungkinanGen === 0 ? 'Tidak mungkin terjadi' : kemungkinanGen === 1 ? 'Wajib terjadi' : 'Mungkin terjadi',
+      });
+    } catch (error) {
+      console.error('Gagal menyimpan data keturunan:', error);
+      return;
+    }
 
     // Setelah data berhasil disimpan, tampilkan pesan berikut
-    alert(`Data berhasil disimpan.\nKemungkinan gen yang diwarisi dari orang tua: ${kemungkinanGen}`);
+    setKemungkinanGen(kemungkinanGen);
   }
 
   return (

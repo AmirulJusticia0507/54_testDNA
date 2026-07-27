@@ -59,7 +59,7 @@ function PasanganHidupTable() {
   const [statusHubungan, setStatusHubungan] = useState("");
   const [pasanganHidup, setPasanganHidup] = useState("");
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     if (umur >= 18 && umur <= 30 && pendidikanTerakhir === "S1" && statusHubungan === "Single" && (hobi === "musik" || hobi === "olahraga")) {
@@ -74,20 +74,15 @@ function PasanganHidupTable() {
         status_hubungan: statusHubungan
       };
 
-      fetch("insertData.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data);
-        })
-        .catch((error) => {
-          console.error("Error:", error);
+      try {
+        await fetch('/pasangan-hidup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
         });
+      } catch (error) {
+        console.error('Gagal menyimpan data pasangan hidup:', error);
+      }
     } else {
       setPasanganHidup(`Maaf ${nama}, kami tidak menemukan pasangan yang cocok untuk Anda`);
     }
@@ -127,7 +122,7 @@ function PasanganHidupTable() {
         </select>
         <button type="submit">Cari Pasangan</button>
 </form>
-{pasangan && (
+{pasanganHidup && (
 <div>
 <h2>Pasangan yang cocok untuk Anda:</h2>
 <table>
@@ -142,11 +137,11 @@ function PasanganHidupTable() {
 </thead>
 <tbody>
 <tr>
-<td>{pasangan.nama}</td>
-<td>{pasangan.umur}</td>
-<td>{pasangan.hobi}</td>
-<td>{pasangan.pendidikanTerakhir}</td>
-<td>{pasangan.statusHubungan}</td>
+<td>{nama}</td>
+<td>{umur}</td>
+<td>{hobi}</td>
+<td>{pendidikanTerakhir}</td>
+<td>{statusHubungan}</td>
 </tr>
 </tbody>
 </table>

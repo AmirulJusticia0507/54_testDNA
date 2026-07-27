@@ -3,6 +3,10 @@ const pasanganHidupController = require('../controllers/pasanganHidupController'
 
 const router = express.Router();
 
-router.get('/pasangan-hidup', pasanganHidupController.get);
+router.get('/', pasanganHidupController.getAll);
+router.get('/:id', pasanganHidupController.getById);
+router.post('/', pasanganHidupController.create);
+router.put('/:id', pasanganHidupController.updateById);
+router.delete('/:id', pasanganHidupController.deleteById);
 
 module.exports = router;

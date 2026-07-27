@@ -1,16 +1,18 @@
-const mongoose = require('mongoose');
+const { Sequelize } = require('sequelize');
+require('dotenv').config();
 
-const url = 'mongodb://localhost:27017/dna_analysis_db';
+const sequelize = process.env.DATABASE_URL
+  ? new Sequelize(process.env.DATABASE_URL, { logging: false })
+  : new Sequelize(
+      process.env.DB_NAME || 'dna_analysis_db',
+      process.env.DB_USER || 'postgres',
+      process.env.DB_PASSWORD || '',
+      {
+        host: process.env.DB_HOST || '127.0.0.1',
+        port: Number(process.env.DB_PORT || 5432),
+        dialect: 'postgres',
+        logging: false,
+      }
+    );
 
-mongoose.connect(url, {
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false
-}).then(() => {
-    console.log('Connected to database');
-}).catch((error) => {
-    console.log('Error connecting to database: ', error.message);
-});
-
-module.exports = mongoose.connection;
+module.exports = sequelize;

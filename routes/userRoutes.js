@@ -20,7 +20,7 @@ const PenelitianIlmiahController = require('../controllers/penelitianIlmiahContr
 const PeningkatanKinerjaAtletikController = require('../controllers/peningkatanKinerjaAtletikController');
 
 // Signup route
-router.post('/signup', UserController.signup);
+router.post('/signup', UserController.register);
 
 // Login route
 router.post('/login', UserController.login);
