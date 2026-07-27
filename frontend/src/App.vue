@@ -7,42 +7,42 @@ const resources = {
     fields: [
       ['nama', 'Nama', 'text'], ['umur', 'Umur', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
       ['kondisi_kesehatan', 'Kondisi kesehatan', 'text'], ['jenis_bencana', 'Jenis bencana', 'text']
-    ]
+    ], results: [['skor_prioritas', 'Skor prioritas'], ['kategori_prioritas', 'Kategori']]
   },
   penyakit: {
     title: 'Penyakit Genetik', endpoint: '/penyakit-genetik',
     fields: [
       ['nama', 'Nama', 'text'], ['usia', 'Usia', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
-      ['riwayat_penyakit', 'Riwayat penyakit', 'text'], ['jenis_penyakit', 'Jenis penyakit', 'text']
-    ]
+      ['riwayat_penyakit', 'Riwayat penyakit', 'text'], ['jenis_penyakit', 'Jenis penyakit', 'text'], ['input_identifikasi_penyakit_genetik', 'Sekuens DNA (A/C/G/T)', 'text']
+    ], results: [['kemungkinan_kelainan_genetik', 'Rasio G'], ['hasil_skrining', 'Hasil skrining']]
   },
   keturunan: {
     title: 'Keturunan', endpoint: '/keturunan',
     fields: [
       ['nama', 'Nama', 'text'], ['usia', 'Usia', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
-      ['nama_ayah', 'Nama ayah', 'text'], ['nama_ibu', 'Nama ibu', 'text'], ['jumlah_anak', 'Jumlah anak', 'number']
-    ]
+      ['nama_ayah', 'Nama ayah', 'text'], ['nama_ibu', 'Nama ibu', 'text'], ['genotipe_ayah', 'Genotipe ayah (AA/Aa/aa)', 'text'], ['genotipe_ibu', 'Genotipe ibu (AA/Aa/aa)', 'text']
+    ], results: [['hasil_punnett', 'Hasil Punnett square']]
   },
   pasangan: {
     title: 'Pasangan Hidup', endpoint: '/pasangan-hidup',
     fields: [
       ['nama', 'Nama', 'text'], ['umur', 'Umur', 'number'], ['hobi', 'Hobi', 'text'],
       ['pendidikan_terakhir', 'Pendidikan terakhir', 'text'], ['status_hubungan', 'Status hubungan', 'text']
-    ]
+    ], results: [['skor_kecocokan', 'Skor kecocokan'], ['rekomendasi', 'Rekomendasi']]
   },
   penelitian: {
     title: 'Penelitian Ilmiah', endpoint: '/penelitian-ilmiah',
     fields: [
       ['nama', 'Nama', 'text'], ['usia', 'Usia', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
-      ['input_penelitian_ilmiah', 'Data penelitian', 'text'], ['korelasi', 'Korelasi', 'number']
-    ]
+      ['input_penelitian_ilmiah', 'Judul/data penelitian', 'text'], ['data_x', 'Data X (pisahkan koma)', 'text'], ['data_y', 'Data Y (pisahkan koma)', 'text']
+    ], results: [['korelasi', 'Korelasi Pearson'], ['hasil_penelitian', 'Hasil']]
   },
   atletik: {
     title: 'Kinerja Atletik', endpoint: '/peningkatan-kinerja-atletik',
     fields: [
       ['nama', 'Nama', 'text'], ['usia', 'Usia', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
-      ['nilai_awal', 'Nilai awal', 'number'], ['nilai_akhir', 'Nilai akhir', 'number'], ['peningkatan_kinerja', 'Peningkatan (%)', 'number']
-    ]
+      ['nilai_awal', 'Nilai awal', 'number'], ['nilai_akhir', 'Nilai akhir', 'number']
+    ], results: [['peningkatan_kinerja', 'Peningkatan (%)']]
   }
 }
 
@@ -55,6 +55,7 @@ const notice = ref('')
 const editingId = ref(null)
 const form = reactive({})
 const config = computed(() => resources[selected.value])
+const columns = computed(() => [...config.value.fields, ...(config.value.results || [])])
 
 function resetForm() {
   editingId.value = null
@@ -207,12 +208,12 @@ onMounted(() => { resetForm(); load() })
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm">
-            <thead class="bg-slate-50 text-slate-500"><tr><th v-for="field in config.fields" :key="field[0]" class="whitespace-nowrap px-4 py-3">{{ field[1] }}</th><th class="px-4 py-3">Aksi</th></tr></thead>
+            <thead class="bg-slate-50 text-slate-500"><tr><th v-for="field in columns" :key="field[0]" class="whitespace-nowrap px-4 py-3">{{ field[1] }}</th><th class="px-4 py-3">Aksi</th></tr></thead>
             <tbody>
-              <tr v-if="loading"><td :colspan="config.fields.length + 1" class="p-6 text-center text-slate-500">Memuat data...</td></tr>
-              <tr v-else-if="!rows.length"><td :colspan="config.fields.length + 1" class="p-6 text-center text-slate-500">Belum ada data.</td></tr>
+              <tr v-if="loading"><td :colspan="columns.length + 1" class="p-6 text-center text-slate-500">Memuat data...</td></tr>
+              <tr v-else-if="!rows.length"><td :colspan="columns.length + 1" class="p-6 text-center text-slate-500">Belum ada data.</td></tr>
               <tr v-for="row in rows" :key="row.id" class="border-t border-slate-100">
-                <td v-for="field in config.fields" :key="field[0]" class="whitespace-nowrap px-4 py-3">{{ row[field[0]] ?? '-' }}</td>
+                <td v-for="field in columns" :key="field[0]" class="max-w-xs whitespace-normal px-4 py-3">{{ row[field[0]] ?? '-' }}</td>
                 <td class="whitespace-nowrap px-4 py-3"><button class="mr-3 font-semibold text-indigo-600" @click="edit(row)">Ubah</button><button class="font-semibold text-red-600" @click="remove(row)">Hapus</button></td>
               </tr>
             </tbody>
