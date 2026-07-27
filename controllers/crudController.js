@@ -1,8 +1,8 @@
-function createCrudController(Model, label) {
+function createCrudController(Model, label, calculate = (data) => data) {
   return {
     async create(req, res) {
       try {
-        const data = await Model.create(req.body);
+        const data = await Model.create(calculate(req.body));
         res.status(201).json({ message: `${label} created successfully`, data });
       } catch (error) {
         res.status(400).json({ error: error.message });
@@ -28,7 +28,7 @@ function createCrudController(Model, label) {
       try {
         const data = await Model.findByPk(req.params.id);
         if (!data) return res.status(404).json({ message: `${label} not found` });
-        await data.update(req.body);
+        await data.update(calculate({ ...data.toJSON(), ...req.body }));
         res.json({ message: `${label} updated successfully`, data });
       } catch (error) {
         res.status(400).json({ error: error.message });
