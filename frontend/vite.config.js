@@ -11,7 +11,8 @@ export default defineConfig({
       '/keturunan': 'http://localhost:3000',
       '/pasangan-hidup': 'http://localhost:3000',
       '/penelitian-ilmiah': 'http://localhost:3000',
-      '/peningkatan-kinerja-atletik': 'http://localhost:3000'
+      '/peningkatan-kinerja-atletik': 'http://localhost:3000',
+      '/variant-assessments': 'http://localhost:3000'
     }
   }
 })

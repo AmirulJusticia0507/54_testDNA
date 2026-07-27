@@ -5,4 +5,6 @@ module.exports = sequelize.define('Keturunan', {
   nama_ayah: DataTypes.STRING, nama_ibu: DataTypes.STRING, nama_pasangan: DataTypes.STRING, jumlah_anak: DataTypes.INTEGER,
   input_keturunan: DataTypes.STRING, kemungkinan_gen: DataTypes.FLOAT, jenis_inheritance: DataTypes.STRING,
   genotipe_ayah: DataTypes.STRING, genotipe_ibu: DataTypes.STRING, hasil_punnett: DataTypes.STRING,
+  pola_pewarisan: DataTypes.STRING, jenis_kelamin_anak: DataTypes.STRING,
+  kemungkinan_normal: DataTypes.FLOAT, kemungkinan_carrier: DataTypes.FLOAT, kemungkinan_terdampak: DataTypes.FLOAT,
 }, { tableName: 'keturunan' });

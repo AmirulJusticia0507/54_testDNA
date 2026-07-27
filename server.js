@@ -12,6 +12,7 @@ const keturunanRoutes = require('./routes/keturunanRoutes');
 const pasanganHidupRoutes = require('./routes/pasanganHidupRoutes');
 const penelitianIlmiahRoutes = require('./routes/penelitianIlmiahRoutes');
 const peningkatanKinerjaAtletikRoutes = require('./routes/peningkatanKinerjaAtletikRoutes');
+const variantAssessmentRoutes = require('./routes/variantAssessmentRoutes');
 
 // Create app instance
 const app = express();
@@ -22,7 +23,7 @@ app.use(express.json());
 
 // Connect MySQL and create tables when they do not exist.
 sequelize.authenticate()
-    .then(() => sequelize.sync())
+    .then(() => sequelize.sync({ alter: process.env.DB_SYNC_ALTER === 'true' }))
     .then(() => console.log('Connected to MySQL database'))
     .catch((error) => console.error(`MySQL connection error: ${error.message}`));
 
@@ -34,6 +35,7 @@ app.use('/keturunan', keturunanRoutes);
 app.use('/pasangan-hidup', pasanganHidupRoutes);
 app.use('/penelitian-ilmiah', penelitianIlmiahRoutes);
 app.use('/peningkatan-kinerja-atletik', peningkatanKinerjaAtletikRoutes);
+app.use('/variant-assessments', variantAssessmentRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;

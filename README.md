@@ -78,6 +78,7 @@ Semua endpoint mendukung `GET`, `POST`, `PUT /:id`, dan `DELETE /:id`.
 | Pasangan hidup | `/pasangan-hidup` |
 | Penelitian ilmiah | `/penelitian-ilmiah` |
 | Kinerja atletik | `/peningkatan-kinerja-atletik` |
+| Variant assessment | `/variant-assessments` |
 
 Autentikasi pengguna tersedia melalui `POST /users/signup` dan `POST /users/login`.
 
@@ -89,10 +90,11 @@ Perhitungan dilakukan di backend saat data ditambah atau diubah.
 | --- | --- |
 | Korban bencana | Skor prioritas berdasarkan kondisi kesehatan dan usia rentan. |
 | Penyakit genetik | Simulasi rasio basa `G` pada sekuens A/C/G/T; bukan diagnosis medis. |
-| Keturunan | Punnett square dari genotipe ayah dan ibu (`AA`, `Aa`, atau `aa`). |
+| Keturunan | Model Mendel autosomal dominan, autosomal resesif, dan X-linked recessive. |
 | Pasangan hidup | Skor kecocokan dari usia, hobi, pendidikan, dan status hubungan. |
 | Penelitian ilmiah | Korelasi Pearson dari dua deret angka yang dipisahkan koma. |
 | Kinerja atletik | Persentase perubahan: `((nilai akhir - nilai awal) / nilai awal) × 100`. |
+| Variant assessment | Skor bukti teknis: coverage, base quality, MAF, konfirmasi Sanger, segregasi, dan kecocokan fenotipe. Hasilnya status review, bukan klasifikasi ACMG resmi atau diagnosis. |
 
 ## Verifikasi
 
