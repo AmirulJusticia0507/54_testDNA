@@ -1,43 +1,3 @@
-// // Import dependencies
-// const express = require('express');
-// const mongoose = require('mongoose');
-// const bodyParser = require('body-parser');
-// const cors = require('cors');
-
-// // Import routes
-// const userRoutes = require('./routes/userRoutes');
-
-// // Create app instance
-// const app = express();
-
-// // Set up middleware
-// app.use(bodyParser.json());
-// app.use(cors());
-// app.use(express.json());
-
-// // Set up database connection
-// mongoose.connect(process.env.MONGODB_URI, {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-// });
-
-// mongoose.connection.on('connected', () => {
-//     console.log('Connected to MongoDB database');
-// });
-
-// mongoose.connection.on('error', (error) => {
-//     console.log(`MongoDB connection error: ${error}`);
-// });
-
-// // Set up routes
-// app.use('/users', userRoutes);
-
-// // Start server
-// const PORT = process.env.PORT || 5000;
-
-// app.listen(PORT, () => {
-//     console.log(`Server listening on port ${PORT}`);
-// });
 // Import dependencies
 const express = require('express');
 const cors = require('cors');
@@ -60,11 +20,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connect PostgreSQL and create tables when they do not exist.
+// Connect MySQL and create tables when they do not exist.
 sequelize.authenticate()
     .then(() => sequelize.sync())
-    .then(() => console.log('Connected to PostgreSQL database'))
-    .catch((error) => console.error(`PostgreSQL connection error: ${error.message}`));
+    .then(() => console.log('Connected to MySQL database'))
+    .catch((error) => console.error(`MySQL connection error: ${error.message}`));
 
 // Set up routes
 app.use('/users', userRoutes);

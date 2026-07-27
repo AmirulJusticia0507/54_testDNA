@@ -1,11 +1,11 @@
 # DNA Analysis Dashboard
 
-Aplikasi manajemen data analisis DNA dengan backend Node.js/Express, PostgreSQL, serta frontend Vue 3 dan Tailwind CSS.
+Aplikasi manajemen data analisis DNA dengan backend Node.js/Express, MySQL, serta frontend Vue 3 dan Tailwind CSS.
 
 ## Teknologi
 
 - Backend: Node.js, Express, Sequelize
-- Database: PostgreSQL
+- Database: MySQL
 - Frontend: Vue 3, Vite, Tailwind CSS
 
 ## Struktur proyek
@@ -13,31 +13,31 @@ Aplikasi manajemen data analisis DNA dengan backend Node.js/Express, PostgreSQL,
 ```text
 54_testDNA/
 ├─ controllers/       # Logika API CRUD
-├─ models/            # Model Sequelize/PostgreSQL
+├─ models/            # Model Sequelize/MySQL
 ├─ routes/            # Endpoint Express
 ├─ frontend/          # Dashboard Vue + Tailwind
-├─ db.js              # Koneksi PostgreSQL
+├─ db.js              # Koneksi MySQL
 ├─ server.js          # Server API
 └─ .env               # Konfigurasi lokal
 ```
 
-## Persiapan PostgreSQL
+## Persiapan MySQL
 
-Pastikan PostgreSQL sudah terpasang dan servicenya berjalan. Buat database bernama `dna_analysis_db`:
+Pastikan MySQL pada Laragon sudah berjalan. Buat database bernama `dna_analysis_db` melalui HeidiSQL/phpMyAdmin, atau jalankan:
 
 ```bash
-createdb -U postgres dna_analysis_db
+CREATE DATABASE dna_analysis_db;
 ```
 
-Atau buat database tersebut melalui pgAdmin. Lalu atur file `.env` di root proyek:
+Lalu atur file `.env` di root proyek. Konfigurasi bawaan Laragon biasanya menggunakan user `root` tanpa password:
 
 ```env
 PORT=3000
 DB_HOST=127.0.0.1
-DB_PORT=5432
+DB_PORT=3306
 DB_NAME=dna_analysis_db
-DB_USER=postgres
-DB_PASSWORD=PASSWORD_POSTGRES_KAMU
+DB_USER=root
+DB_PASSWORD=
 TOKEN_SECRET=ganti-dengan-rahasia-yang-aman
 ```
 
