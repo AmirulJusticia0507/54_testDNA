@@ -119,10 +119,10 @@ export function useAnalysis(currentUser, selected) {
     nextTick(() => initSignatureCanvas())
   }
 
-  async function proceedAnalysis() {
+  async function proceedAnalysis(currentPage) {
     const row = analysisRow.value
     analysisLoading.value = true
-    showAnalysis.value = true
+    if (currentPage) currentPage.value = 'analysis'
     analysisNarrative.value = ''
     document.getElementById('app')?.scrollTo({ top: 0 })
     await new Promise(r => setTimeout(r, 1500))
@@ -142,10 +142,11 @@ export function useAnalysis(currentUser, selected) {
     }
   }
 
-  function closeAnalysis() {
+  function closeAnalysis(currentPage) {
     showAnalysis.value = false
     analysisRow.value = null
     analysisNarrative.value = ''
+    if (currentPage) currentPage.value = 'dashboard'
   }
 
   function printAnalysis() {
