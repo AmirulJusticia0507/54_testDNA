@@ -12,7 +12,7 @@ const pasanganHidupRoutes = require('./routes/pasanganHidupRoutes');
 const penelitianIlmiahRoutes = require('./routes/penelitianIlmiahRoutes');
 const peningkatanKinerjaAtletikRoutes = require('./routes/peningkatanKinerjaAtletikRoutes');
 const variantAssessmentRoutes = require('./routes/variantAssessmentRoutes');
-const errorHandler = require("./middleware/errorHandler");
+const errorHandler = require("./middleware/middleware/errorHandler");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
 

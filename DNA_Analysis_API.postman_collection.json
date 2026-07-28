@@ -1,0 +1,485 @@
+{
+  "info": {
+    "name": "DNA Analysis API",
+    "description": "API Collection untuk Sistem Manajemen Data DNA Analysis",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/users/login", "host": ["{{baseUrl}}"], "path": ["users", "login"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"superadmmin@gmail.com\",\n  \"password\": \"gedanggoreng\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var res = pm.response.json();",
+                  "if (res.token) { pm.collectionVariables.set('token', res.token); }",
+                  "pm.test('Status 200', function() { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/users/signup", "host": ["{{baseUrl}}"], "path": ["users", "signup"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"admin2\",\n  \"email\": \"admin2@gmail.com\",\n  \"password\": \"password123\",\n  \"role\": \"admin\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/users/forgot-password", "host": ["{{baseUrl}}"], "path": ["users", "forgot-password"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"superadmmin@gmail.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/users/reset-password", "host": ["{{baseUrl}}"], "path": ["users", "reset-password"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"TOKEN_DARI_FORGOT_PASSWORD\",\n  \"password\": \"passwordbaru123\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Manage Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] },
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/users/1", "host": ["{{baseUrl}}"], "path": ["users", "1"] },
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/users/1", "host": ["{{baseUrl}}"], "path": ["users", "1"] },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"admin updated\",\n  \"role\": \"admin\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/users/2", "host": ["{{baseUrl}}"], "path": ["users", "2"] },
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Korban Bencana",
+      "item": [
+        {
+          "name": "Get All",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/korban-bencana", "host": ["{{baseUrl}}"], "path": ["korban-bencana"] }
+          }
+        },
+        {
+          "name": "Get by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/korban-bencana/1", "host": ["{{baseUrl}}"], "path": ["korban-bencana", "1"] }
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/korban-bencana", "host": ["{{baseUrl}}"], "path": ["korban-bencana"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"Budi Santoso\",\n  \"umur\": 35,\n  \"jenis_kelamin\": \"Laki-laki\",\n  \"kondisi_kesehatan\": \"Luka ringan\",\n  \"jenis_bencana\": \"Banjir\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/korban-bencana/1", "host": ["{{baseUrl}}"], "path": ["korban-bencana", "1"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kondisi_kesehatan\": \"Sembuh\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/korban-bencana/1", "host": ["{{baseUrl}}"], "path": ["korban-bencana", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Penyakit Genetik",
+      "item": [
+        {
+          "name": "Get All",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/penyakit-genetik", "host": ["{{baseUrl}}"], "path": ["penyakit-genetik"] }
+          }
+        },
+        {
+          "name": "Get by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/penyakit-genetik/1", "host": ["{{baseUrl}}"], "path": ["penyakit-genetik", "1"] }
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/penyakit-genetik", "host": ["{{baseUrl}}"], "path": ["penyakit-genetik"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"Siti Aminah\",\n  \"usia\": 28,\n  \"jenis_kelamin\": \"Perempuan\",\n  \"riwayat_penyakit\": \"Keluarga ada riwayat diabetes\",\n  \"jenis_penyakit\": \"Diabetes tipe 2\",\n  \"input_identifikasi_penyakit_genetik\": \"ATCGATCGATCG\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/penyakit-genetik/1", "host": ["{{baseUrl}}"], "path": ["penyakit-genetik", "1"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hasil_skrining\": \"Positif\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/penyakit-genetik/1", "host": ["{{baseUrl}}"], "path": ["penyakit-genetik", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Keturunan",
+      "item": [
+        {
+          "name": "Get All",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/keturunan", "host": ["{{baseUrl}}"], "path": ["keturunan"] }
+          }
+        },
+        {
+          "name": "Get by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/keturunan/1", "host": ["{{baseUrl}}"], "path": ["keturunan", "1"] }
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/keturunan", "host": ["{{baseUrl}}"], "path": ["keturunan"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"Andi Wijaya\",\n  \"usia\": 30,\n  \"jenis_kelamin\": \"Laki-laki\",\n  \"nama_ayah\": \"Wijaya Kusuma\",\n  \"nama_ibu\": \"Rina Hartati\",\n  \"pola_pewarisan\": \"Autosomal dominan\",\n  \"jenis_kelamin_anak\": \"Laki-laki\",\n  \"genotipe_ayah\": \"Aa\",\n  \"genotipe_ibu\": \"Aa\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/keturunan/1", "host": ["{{baseUrl}}"], "path": ["keturunan", "1"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pola_pewarisan\": \"Autosomal resesif\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/keturunan/1", "host": ["{{baseUrl}}"], "path": ["keturunan", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pasangan Hidup",
+      "item": [
+        {
+          "name": "Get All",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/pasangan-hidup", "host": ["{{baseUrl}}"], "path": ["pasangan-hidup"] }
+          }
+        },
+        {
+          "name": "Get by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/pasangan-hidup/1", "host": ["{{baseUrl}}"], "path": ["pasangan-hidup", "1"] }
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/pasangan-hidup", "host": ["{{baseUrl}}"], "path": ["pasangan-hidup"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"Dewi Lestari\",\n  \"umur\": 25,\n  \"hobi\": \"Membaca, Olahraga\",\n  \"pendidikan_terakhir\": \"S2\",\n  \"status_hubungan\": \"Single\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/pasangan-hidup/1", "host": ["{{baseUrl}}"], "path": ["pasangan-hidup", "1"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status_hubungan\": \"Menikah\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/pasangan-hidup/1", "host": ["{{baseUrl}}"], "path": ["pasangan-hidup", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Penelitian Ilmiah",
+      "item": [
+        {
+          "name": "Get All",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/penelitian-ilmiah", "host": ["{{baseUrl}}"], "path": ["penelitian-ilmiah"] }
+          }
+        },
+        {
+          "name": "Get by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/penelitian-ilmiah/1", "host": ["{{baseUrl}}"], "path": ["penelitian-ilmiah", "1"] }
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/penelitian-ilmiah", "host": ["{{baseUrl}}"], "path": ["penelitian-ilmiah"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"Dr. Rudi\",\n  \"usia\": 40,\n  \"jenis_kelamin\": \"Laki-laki\",\n  \"input_penelitian_ilmiah\": \"Korelasi tinggi badan dengan berat badan\",\n  \"data_x\": \"160,165,170,175,180\",\n  \"data_y\": \"55,60,68,72,80\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/penelitian-ilmiah/1", "host": ["{{baseUrl}}"], "path": ["penelitian-ilmiah", "1"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"data_x\": \"160,165,170,175,180,185\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/penelitian-ilmiah/1", "host": ["{{baseUrl}}"], "path": ["penelitian-ilmiah", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Peningkatan Kinerja Atletik",
+      "item": [
+        {
+          "name": "Get All",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/peningkatan-kinerja-atletik", "host": ["{{baseUrl}}"], "path": ["peningkatan-kinerja-atletik"] }
+          }
+        },
+        {
+          "name": "Get by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/peningkatan-kinerja-atletik/1", "host": ["{{baseUrl}}"], "path": ["peningkatan-kinerja-atletik", "1"] }
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/peningkatan-kinerja-atletik", "host": ["{{baseUrl}}"], "path": ["peningkatan-kinerja-atletik"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"Rina Putri\",\n  \"usia\": 22,\n  \"jenis_kelamin\": \"Perempuan\",\n  \"nilai_awal\": 60,\n  \"nilai_akhir\": 85\n}"
+            }
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/peningkatan-kinerja-atletik/1", "host": ["{{baseUrl}}"], "path": ["peningkatan-kinerja-atletik", "1"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nilai_akhir\": 90\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/peningkatan-kinerja-atletik/1", "host": ["{{baseUrl}}"], "path": ["peningkatan-kinerja-atletik", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Variant Assessment",
+      "item": [
+        {
+          "name": "Get All",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/variant-assessments", "host": ["{{baseUrl}}"], "path": ["variant-assessments"] }
+          }
+        },
+        {
+          "name": "Get by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/variant-assessments/1", "host": ["{{baseUrl}}"], "path": ["variant-assessments", "1"] }
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/variant-assessments", "host": ["{{baseUrl}}"], "path": ["variant-assessments"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sample_name\": \"SAMPLE-001\",\n  \"gene\": \"BRCA1\",\n  \"variant_notation\": \"c.5470_5477del\",\n  \"variant_type\": \"Frameshift\",\n  \"coverage\": 120,\n  \"base_quality\": 30,\n  \"maf\": 0.001,\n  \"sanger_status\": \"Terkonfirmasi\",\n  \"segregation_status\": \"Cosegregate\",\n  \"phenotype_match\": \"Sesuai\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PUT",
+            "url": { "raw": "{{baseUrl}}/variant-assessments/1", "host": ["{{baseUrl}}"], "path": ["variant-assessments", "1"] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status_review\": \"Reviewed\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/variant-assessments/1", "host": ["{{baseUrl}}"], "path": ["variant-assessments", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Swagger Docs",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/api-docs", "host": ["{{baseUrl}}"], "path": ["api-docs"] }
+      }
+    }
+  ]
+}
