@@ -1,10 +1,9 @@
-// Import dependencies
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const sequelize = require('./db');
 require('dotenv').config();
 
-// Import routes
 const userRoutes = require('./routes/userRoutes');
 const korbanBencanaRoutes = require('./routes/identifikasiKorbanBencanaRoutes');
 const penyakitGenetikRoutes = require('./routes/penyakitGenetikRoutes');
@@ -17,44 +16,22 @@ const errorHandler = require("./middleware/errorHandler");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
 
-
-// Create app instance
 const app = express();
 
-// Set up middleware
 app.use(cors());
 app.use(express.json());
 
-// Route tidak ditemukan
-app.use((req, res, next) => {
-    const error = new Error("Route not found");
-    error.statusCode = 404;
-    next(error);
-});
-
-app.use(
-    "/api-docs",
-    swaggerUi.serve,
-    swaggerUi.setup(swaggerSpec)
-);
-
-app.use(errorHandler);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get("/", (req, res) => {
-    res.json({
-        status: "OK",
-        service: "DNA Analysis API",
-        version: "1.0.0"
-    });
+    res.json({ status: "OK", service: "DNA Analysis API", version: "1.0.0" });
 });
 
-// Connect MySQL and create tables when they do not exist.
 sequelize.authenticate()
     .then(() => sequelize.sync({ alter: process.env.DB_SYNC_ALTER === 'true' }))
     .then(() => console.log('Connected to MySQL database'))
     .catch((error) => console.error(`MySQL connection error: ${error.message}`));
 
-// Set up routes
 app.use('/users', userRoutes);
 app.use('/korban-bencana', korbanBencanaRoutes);
 app.use('/penyakit-genetik', penyakitGenetikRoutes);
@@ -63,6 +40,20 @@ app.use('/pasangan-hidup', pasanganHidupRoutes);
 app.use('/penelitian-ilmiah', penelitianIlmiahRoutes);
 app.use('/peningkatan-kinerja-atletik', peningkatanKinerjaAtletikRoutes);
 app.use('/variant-assessments', variantAssessmentRoutes);
+
+const frontendDist = path.join(__dirname, 'frontend', 'dist');
+app.use(express.static(frontendDist));
+app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendDist, 'index.html'));
+});
+
+app.use((req, res, next) => {
+    const error = new Error("Route not found");
+    error.statusCode = 404;
+    next(error);
+});
+
+app.use(errorHandler);
 
 // Start server
 const PORT = process.env.PORT || 5000;
