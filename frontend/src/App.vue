@@ -46,6 +46,16 @@ function doSwitchMenu(key) {
   switchMenu(key)
 }
 
+function doCloseAnalysis() { closeAnalysis(currentPage) }
+
+function doConfirmSignature() {
+  const canvas = signatureCanvas.value
+  if (!canvas) return
+  signatureData.value = canvas.toDataURL('image/png')
+  showSignatureModal.value = false
+  proceedAnalysis(currentPage)
+}
+
 onMounted(() => {
   if (token.value && currentUser.value) {
     const firstKey = Object.keys(visibleResources.value)[0] || 'korban'
@@ -372,13 +382,13 @@ onMounted(() => {
             </div>
             <div class="flex items-center justify-end gap-3 border-t border-slate-200 px-6 py-4">
               <button @click="clearSignature" class="rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">Hapus</button>
-              <button @click="confirmSignature" class="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-bold text-white hover:bg-indigo-700 transition">Konfirmasi & Lanjut</button>
+              <button @click="doConfirmSignature" class="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-bold text-white hover:bg-indigo-700 transition">Konfirmasi & Lanjut</button>
             </div>
           </div>
         </div>
 
         <!-- ANALYSIS LOADING SPINNER -->
-        <div v-if="analysisLoading" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm">
+        <div v-if="currentPage === 'analysis' && analysisLoading" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm">
           <div class="dna-loader mb-6">
             <div class="strand strand-left">
               <div v-for="n in 6" :key="'l'+n" class="dot" :style="{ animationDelay: (n * 0.15) + 's' }"></div>
@@ -392,9 +402,9 @@ onMounted(() => {
         </div>
 
         <!-- ANALYSIS RESULTS PAGE -->
-        <div v-if="showAnalysis && !analysisLoading" class="mx-auto max-w-4xl">
+        <div v-if="currentPage === 'analysis' && !analysisLoading" class="mx-auto max-w-4xl">
           <div class="mb-6 flex items-center justify-between no-print">
-            <button @click="closeAnalysis" class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
+              <button @click="doCloseAnalysis" class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
               &larr; Kembali ke Tabel
             </button>
             <button @click="printAnalysis" class="flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-indigo-700 transition">
