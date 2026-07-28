@@ -25,11 +25,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Route tidak ditemukan
-app.use((req, res, next) => {
-    const error = new Error("Route not found");
-    error.statusCode = 404;
-    next(error);
+app.get("/", (req, res) => {
+    res.json({
+        status: "OK",
+        service: "DNA Analysis API",
+        version: "1.0.0"
+    });
 });
 
 app.use(
@@ -38,7 +39,6 @@ app.use(
     swaggerUi.setup(swaggerSpec)
 );
 
-app.use(errorHandler);
 
 app.get("/", (req, res) => {
     res.json({
@@ -63,6 +63,16 @@ app.use('/pasangan-hidup', pasanganHidupRoutes);
 app.use('/penelitian-ilmiah', penelitianIlmiahRoutes);
 app.use('/peningkatan-kinerja-atletik', peningkatanKinerjaAtletikRoutes);
 app.use('/variant-assessments', variantAssessmentRoutes);
+
+// 404 Handler (HARUS setelah semua route)
+app.use((req, res, next) => {
+    const error = new Error("Route not found");
+    error.statusCode = 404;
+    next(error);
+});
+
+// Global Error Handler (PALING TERAKHIR)
+app.use(errorHandler);
 
 // Start server
 const PORT = process.env.PORT || 5000;
