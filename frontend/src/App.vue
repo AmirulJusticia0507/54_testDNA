@@ -4,6 +4,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 const resources = {
   korban: {
     title: 'Korban Bencana', endpoint: '/korban-bencana',
+    minRole: 'user',
     fields: [
       ['nama', 'Nama', 'text'], ['umur', 'Umur', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
       ['kondisi_kesehatan', 'Kondisi kesehatan', 'text'], ['jenis_bencana', 'Jenis bencana', 'text']
@@ -11,6 +12,7 @@ const resources = {
   },
   penyakit: {
     title: 'Penyakit Genetik', endpoint: '/penyakit-genetik',
+    minRole: 'user',
     fields: [
       ['nama', 'Nama', 'text'], ['usia', 'Usia', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
       ['riwayat_penyakit', 'Riwayat penyakit', 'text'], ['jenis_penyakit', 'Jenis penyakit', 'text'], ['input_identifikasi_penyakit_genetik', 'Sekuens DNA (A/C/G/T)', 'text']
@@ -18,6 +20,7 @@ const resources = {
   },
   keturunan: {
     title: 'Keturunan', endpoint: '/keturunan',
+    minRole: 'user',
     fields: [
       ['nama', 'Nama', 'text'], ['usia', 'Usia', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
       ['nama_ayah', 'Nama ayah', 'text'], ['nama_ibu', 'Nama ibu', 'text'], ['pola_pewarisan', 'Pola pewarisan', 'text', 'Autosomal dominan / Autosomal resesif / X-linked recessive'],
@@ -26,6 +29,7 @@ const resources = {
   },
   pasangan: {
     title: 'Pasangan Hidup', endpoint: '/pasangan-hidup',
+    minRole: 'user',
     fields: [
       ['nama', 'Nama', 'text'], ['umur', 'Umur', 'number'], ['hobi', 'Hobi', 'text'],
       ['pendidikan_terakhir', 'Pendidikan terakhir', 'text'], ['status_hubungan', 'Status hubungan', 'text']
@@ -33,6 +37,7 @@ const resources = {
   },
   penelitian: {
     title: 'Penelitian Ilmiah', endpoint: '/penelitian-ilmiah',
+    minRole: 'user',
     fields: [
       ['nama', 'Nama', 'text'], ['usia', 'Usia', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
       ['input_penelitian_ilmiah', 'Judul/data penelitian', 'text'], ['data_x', 'Data X (pisahkan koma)', 'text'], ['data_y', 'Data Y (pisahkan koma)', 'text']
@@ -40,6 +45,7 @@ const resources = {
   },
   atletik: {
     title: 'Kinerja Atletik', endpoint: '/peningkatan-kinerja-atletik',
+    minRole: 'user',
     fields: [
       ['nama', 'Nama', 'text'], ['usia', 'Usia', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
       ['nilai_awal', 'Nilai awal', 'number'], ['nilai_akhir', 'Nilai akhir', 'number']
@@ -47,15 +53,18 @@ const resources = {
   },
   variant: {
     title: 'Variant Assessment', endpoint: '/variant-assessments',
+    minRole: 'admin',
     fields: [
       ['sample_name', 'Nama sampel', 'text'], ['gene', 'Gen', 'text'], ['variant_notation', 'Notasi varian', 'text', 'Contoh: c.123A>G'], ['variant_type', 'Tipe varian', 'text'],
-      ['coverage', 'Coverage', 'number'], ['base_quality', 'Base quality', 'number'], ['maf', 'MAF (0–1)', 'number'],
+      ['coverage', 'Coverage', 'number'], ['base_quality', 'Base quality', 'number'], ['maf', 'MAF (0-1)', 'number'],
       ['sanger_status', 'Status Sanger', 'text', 'Terkonfirmasi / Tidak terkonfirmasi / Belum diuji'], ['segregation_status', 'Segregasi keluarga', 'text', 'De novo / Cosegregate / Belum diuji'], ['phenotype_match', 'Kecocokan fenotipe', 'text', 'Sesuai / Tidak sesuai / Belum dinilai']
     ], results: [['skor_bukti', 'Skor bukti'], ['status_review', 'Status review'], ['klasifikasi_simulasi', 'Catatan']]
   }
 }
 
-const currentPage = ref('login')
+const roleHierarchy = { superadmin: 3, admin: 2, user: 1 }
+
+const currentPage = ref('landing')
 const token = ref(localStorage.getItem('token') || '')
 const currentUser = ref(JSON.parse(localStorage.getItem('user') || 'null'))
 const selected = ref('korban')
@@ -69,6 +78,21 @@ const form = reactive({})
 const config = computed(() => resources[selected.value])
 const columns = computed(() => [...config.value.fields, ...(config.value.results || [])])
 const menuLoading = ref(false)
+
+const canManage = computed(() => currentUser.value && currentUser.value.role === 'superadmin')
+const canWrite = computed(() => {
+  if (!currentUser.value) return false
+  return roleHierarchy[currentUser.value.role] >= roleHierarchy['admin']
+})
+const visibleResources = computed(() => {
+  if (!currentUser.value) return {}
+  const userLevel = roleHierarchy[currentUser.value.role] || 0
+  const out = {}
+  for (const [key, val] of Object.entries(resources)) {
+    if (userLevel >= roleHierarchy[val.minRole]) out[key] = val
+  }
+  return out
+})
 
 const loginForm = reactive({ email: '', password: '' })
 const loginError = ref('')
@@ -104,13 +128,28 @@ function setAuth(tokenVal, userVal) {
 }
 
 function logout() {
-  token.value = ''
-  currentUser.value = null
-  localStorage.removeItem('token')
-  localStorage.removeItem('user')
-  currentPage.value = 'login'
-  loginForm.email = ''
-  loginForm.password = ''
+  Swal.fire({
+    title: 'Keluar?',
+    text: 'Anda akan logout dari sistem.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#6366f1',
+    cancelButtonColor: '#94a3b8',
+    confirmButtonText: 'Ya, keluar',
+    cancelButtonText: 'Batal'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      token.value = ''
+      currentUser.value = null
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      currentPage.value = 'landing'
+      loginForm.email = ''
+      loginForm.password = ''
+      selected.value = 'korban'
+      Swal.fire({ title: 'Berhasil!', text: 'Anda telah logout.', icon: 'success', timer: 1500, showConfirmButton: false })
+    }
+  })
 }
 
 function resetForm() {
@@ -141,8 +180,9 @@ async function login() {
     const data = await parseResponse(response)
     if (!response.ok) throw new Error(data.error || 'Login gagal')
     setAuth(data.token, data.user)
+    const firstKey = Object.keys(visibleResources.value)[0] || 'korban'
+    selected.value = firstKey
     currentPage.value = 'dashboard'
-    selected.value = 'korban'
   } catch (err) {
     loginError.value = err.message
   } finally {
@@ -256,6 +296,7 @@ async function remove(row) {
 
 async function switchMenu(key) {
   menuLoading.value = true
+  currentPage.value = 'dashboard'
   selected.value = key
   resetForm()
   await load()
@@ -339,6 +380,8 @@ async function deleteUser(user) {
 watch(selected, () => { if (currentPage.value === 'dashboard') { resetForm(); load() } })
 onMounted(() => {
   if (token.value && currentUser.value) {
+    const firstKey = Object.keys(visibleResources.value)[0] || 'korban'
+    selected.value = firstKey
     currentPage.value = 'dashboard'
   }
 })
@@ -354,24 +397,76 @@ onMounted(() => {
           <animateTransform attributeName="transform" type="rotate" from="0 32 32" to="360 32 32" dur="1.2s" repeatCount="indefinite"/>
         </path>
         <path d="M32 12 C32 12, 26 20, 26 32 C26 44, 32 52, 32 52 C32 52, 38 44, 38 32 C38 20, 32 12, 32 12Z" stroke="#818cf8" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.2"/>
-        <circle cx="24" cy="22" r="2.5" fill="#6366f1">
-          <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="40" cy="22" r="2.5" fill="#818cf8">
-          <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="24" cy="42" r="2.5" fill="#818cf8">
-          <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="40" cy="42" r="2.5" fill="#6366f1">
-          <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="32" cy="32" r="2" fill="#4f46e5">
-          <animate attributeName="r" values="2;3;2" dur="1s" repeatCount="indefinite"/>
-        </circle>
+        <circle cx="24" cy="22" r="2.5" fill="#6366f1"><animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite"/></circle>
+        <circle cx="40" cy="22" r="2.5" fill="#818cf8"><animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/></circle>
+        <circle cx="24" cy="42" r="2.5" fill="#818cf8"><animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/></circle>
+        <circle cx="40" cy="42" r="2.5" fill="#6366f1"><animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite"/></circle>
+        <circle cx="32" cy="32" r="2" fill="#4f46e5"><animate attributeName="r" values="2;3;2" dur="1s" repeatCount="indefinite"/></circle>
       </svg>
       <p class="text-sm font-semibold text-indigo-600">Memuat data DNA...</p>
     </div>
+  </div>
+
+  <!-- LANDING PAGE -->
+  <div v-if="currentPage === 'landing'" class="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800">
+    <nav class="flex items-center justify-between px-6 py-4 sm:px-12">
+      <div class="flex items-center gap-3">
+        <div class="grid h-10 w-10 place-items-center rounded-xl bg-white/20 backdrop-blur-sm font-bold text-white text-lg">DNA</div>
+        <span class="text-xl font-bold text-white">DNA Analysis</span>
+      </div>
+      <button @click="currentPage = 'login'" class="rounded-lg bg-white px-5 py-2 text-sm font-semibold text-indigo-700 shadow hover:bg-indigo-50 transition">Masuk</button>
+    </nav>
+
+    <div class="flex flex-col items-center justify-center px-6 pt-20 pb-32 text-center">
+      <div class="grid h-24 w-24 place-items-center rounded-3xl bg-white/15 backdrop-blur-sm font-bold text-white text-4xl mb-8 shadow-2xl">DNA</div>
+      <h1 class="text-4xl sm:text-6xl font-extrabold text-white leading-tight max-w-3xl">
+        Sistem Manajemen <span class="text-indigo-200">Data Genetik</span>
+      </h1>
+      <p class="mt-6 max-w-xl text-lg text-indigo-200 leading-relaxed">
+        Platform analisis DNA untuk identifikasi korban bencana, penyakit genetik, pola keturunan, penelitian ilmiah, dan assessment varian genetik.
+      </p>
+      <div class="mt-10 flex gap-4">
+        <button @click="currentPage = 'login'" class="rounded-xl bg-white px-8 py-3.5 text-base font-bold text-indigo-700 shadow-lg hover:bg-indigo-50 transition">Mulai Sekarang</button>
+        <a href="#fitur" class="rounded-xl border-2 border-white/30 px-8 py-3.5 text-base font-bold text-white hover:bg-white/10 transition">Pelajari Lebih Lanjut</a>
+      </div>
+
+      <div id="fitur" class="mt-24 grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 text-left">
+        <div class="rounded-2xl bg-white/10 backdrop-blur-sm p-6 border border-white/20">
+          <div class="grid h-12 w-12 place-items-center rounded-xl bg-indigo-500/30 text-2xl mb-4">🧬</div>
+          <h3 class="text-lg font-bold text-white">Penyakit Genetik</h3>
+          <p class="mt-2 text-sm text-indigo-200">Identifikasi kemungkinan kelainan genetik dari sekuens DNA.</p>
+        </div>
+        <div class="rounded-2xl bg-white/10 backdrop-blur-sm p-6 border border-white/20">
+          <div class="grid h-12 w-12 place-items-center rounded-xl bg-indigo-500/30 text-2xl mb-4">👨‍👩‍👧‍👦</div>
+          <h3 class="text-lg font-bold text-white">Analisis Keturunan</h3>
+          <p class="mt-2 text-sm text-indigo-200">Simulasi pewarisan genetik dengan diagram Punnett.</p>
+        </div>
+        <div class="rounded-2xl bg-white/10 backdrop-blur-sm p-6 border border-white/20">
+          <div class="grid h-12 w-12 place-items-center rounded-xl bg-indigo-500/30 text-2xl mb-4">🚨</div>
+          <h3 class="text-lg font-bold text-white">Korban Bencana</h3>
+          <p class="mt-2 text-sm text-indigo-200">Sistem prioritas berbasis DNA untuk identifikasi korban.</p>
+        </div>
+        <div class="rounded-2xl bg-white/10 backdrop-blur-sm p-6 border border-white/20">
+          <div class="grid h-12 w-12 place-items-center rounded-xl bg-indigo-500/30 text-2xl mb-4">🔬</div>
+          <h3 class="text-lg font-bold text-white">Penelitian Ilmiah</h3>
+          <p class="mt-2 text-sm text-indigo-200">Analisis korelasi Pearson untuk data genetik.</p>
+        </div>
+        <div class="rounded-2xl bg-white/10 backdrop-blur-sm p-6 border border-white/20">
+          <div class="grid h-12 w-12 place-items-center rounded-xl bg-indigo-500/30 text-2xl mb-4">🏃</div>
+          <h3 class="text-lg font-bold text-white">Kinerja Atletik</h3>
+          <p class="mt-2 text-sm text-indigo-200">Tracking peningkatan performa berbasis data genetik.</p>
+        </div>
+        <div class="rounded-2xl bg-white/10 backdrop-blur-sm p-6 border border-white/20">
+          <div class="grid h-12 w-12 place-items-center rounded-xl bg-indigo-500/30 text-2xl mb-4">🧪</div>
+          <h3 class="text-lg font-bold text-white">Variant Assessment</h3>
+          <p class="mt-2 text-sm text-indigo-200">Evaluasi varian genetik dengan skor bukti klinis.</p>
+        </div>
+      </div>
+    </div>
+
+    <footer class="border-t border-white/10 px-6 py-6 text-center text-sm text-indigo-300">
+      &copy; {{ new Date().getFullYear() }} DNA Analysis &mdash; Vue 3, Tailwind CSS, dan Node.js.
+    </footer>
   </div>
 
   <!-- LOGIN PAGE -->
@@ -402,8 +497,9 @@ onMounted(() => {
             {{ loginLoading ? 'Masuk...' : 'Masuk' }}
           </button>
         </form>
-        <div class="mt-4 text-center">
+        <div class="mt-4 flex items-center justify-between">
           <button @click="showForgotPassword = true" class="text-sm text-indigo-600 hover:underline">Lupa password?</button>
+          <button @click="currentPage = 'landing'" class="text-sm text-slate-500 hover:underline">&larr; Kembali</button>
         </div>
       </div>
 
@@ -459,7 +555,10 @@ onMounted(() => {
       </div>
       <div class="flex items-center gap-3">
         <span class="hidden text-sm text-slate-500 sm:inline">{{ currentUser?.name }}</span>
-        <span class="hidden text-xs text-slate-400 sm:inline px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium">{{ currentUser?.role }}</span>
+        <span class="hidden text-xs sm:inline px-2 py-0.5 rounded-full font-medium"
+          :class="currentUser?.role === 'superadmin' ? 'bg-purple-100 text-purple-700' : currentUser?.role === 'admin' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'">
+          {{ currentUser?.role }}
+        </span>
         <div class="grid h-9 w-9 place-items-center rounded-full bg-indigo-100 font-semibold text-indigo-700">{{ currentUser?.name?.charAt(0)?.toUpperCase() || 'A' }}</div>
         <button @click="logout" class="ml-2 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-200 transition">Keluar</button>
       </div>
@@ -469,32 +568,34 @@ onMounted(() => {
       <aside class="sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 border-r border-slate-200 bg-white p-4 lg:block">
         <p class="mb-3 px-3 text-xs font-bold uppercase tracking-wider text-slate-400">Menu Data</p>
         <nav class="space-y-1">
-          <button v-for="(item, key) in resources" :key="key" @click="switchMenu(key)"
+          <button v-for="(item, key) in visibleResources" :key="key" @click="switchMenu(key)"
             class="flex w-full items-center rounded-lg px-3 py-2.5 text-left text-sm font-medium transition"
             :class="selected === key && currentPage === 'dashboard' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'">
             {{ item.title }}
           </button>
         </nav>
 
-        <p class="mb-3 mt-6 px-3 text-xs font-bold uppercase tracking-wider text-slate-400">Pengaturan</p>
-        <nav class="space-y-1">
-          <button @click="currentPage = 'users'; loadUsers()"
-            class="flex w-full items-center rounded-lg px-3 py-2.5 text-left text-sm font-medium transition"
-            :class="currentPage === 'users' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'">
-            Manage Users
-          </button>
-        </nav>
+        <template v-if="canManage">
+          <p class="mb-3 mt-6 px-3 text-xs font-bold uppercase tracking-wider text-slate-400">Pengaturan</p>
+          <nav class="space-y-1">
+            <button @click="currentPage = 'users'; loadUsers()"
+              class="flex w-full items-center rounded-lg px-3 py-2.5 text-left text-sm font-medium transition"
+              :class="currentPage === 'users' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-indigo-50 hover:text-indigo-700'">
+              Manage Users
+            </button>
+          </nav>
+        </template>
       </aside>
 
       <main class="min-w-0 flex-1 p-4 sm:p-8">
         <!-- MOBILE NAV -->
         <nav class="mb-6 flex gap-2 overflow-x-auto pb-1 lg:hidden">
-          <button v-for="(item, key) in resources" :key="key" @click="switchMenu(key)"
+          <button v-for="(item, key) in visibleResources" :key="key" @click="switchMenu(key)"
             class="shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition"
             :class="selected === key && currentPage === 'dashboard' ? 'bg-indigo-600 text-white shadow' : 'bg-white text-slate-600 hover:bg-indigo-50'">
             {{ item.title }}
           </button>
-          <button @click="currentPage = 'users'; loadUsers()"
+          <button v-if="canManage" @click="currentPage = 'users'; loadUsers()"
             class="shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition"
             :class="currentPage === 'users' ? 'bg-indigo-600 text-white shadow' : 'bg-white text-slate-600 hover:bg-indigo-50'">
             Manage Users
@@ -506,14 +607,16 @@ onMounted(() => {
           <div class="mb-6">
             <p class="text-sm font-semibold uppercase tracking-widest text-indigo-600">Dashboard</p>
             <h1 class="mt-1 text-3xl font-bold text-slate-900">{{ config.title }}</h1>
-            <p class="mt-2 text-slate-600">Kelola data melalui API Node.js/Express.</p>
+            <p class="mt-2 text-slate-600" v-if="canWrite">Kelola data melalui API Node.js/Express.</p>
+            <p class="mt-2 text-slate-600" v-else>Menampilkan data (read-only).</p>
           </div>
 
           <div v-if="error" class="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">{{ error }}</div>
           <div v-if="notice" class="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-emerald-700">{{ notice }}</div>
 
-          <section class="grid gap-6 xl:grid-cols-[380px_1fr]">
-            <form class="rounded-xl bg-white p-5 shadow-sm" @submit.prevent="submit">
+          <section :class="canWrite ? 'grid gap-6 xl:grid-cols-[380px_1fr]' : ''">
+            <!-- FORM (hanya untuk admin & superadmin) -->
+            <form v-if="canWrite" class="rounded-xl bg-white p-5 shadow-sm" @submit.prevent="submit">
               <h2 class="mb-5 text-lg font-bold">{{ editingId ? 'Ubah' : 'Tambah' }} {{ config.title }}</h2>
               <div class="space-y-4">
                 <label v-for="field in config.fields" :key="field[0]" class="block text-sm font-medium text-slate-700">
@@ -537,13 +640,21 @@ onMounted(() => {
               </div>
               <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
-                  <thead class="bg-slate-50 text-slate-500"><tr><th v-for="field in columns" :key="field[0]" class="whitespace-nowrap px-4 py-3">{{ field[1] }}</th><th class="px-4 py-3">Aksi</th></tr></thead>
+                  <thead class="bg-slate-50 text-slate-500">
+                    <tr>
+                      <th v-for="field in columns" :key="field[0]" class="whitespace-nowrap px-4 py-3">{{ field[1] }}</th>
+                      <th v-if="canWrite" class="px-4 py-3">Aksi</th>
+                    </tr>
+                  </thead>
                   <tbody>
                     <tr v-if="loading"><td :colspan="columns.length + 1" class="p-6 text-center text-slate-500">Memuat data...</td></tr>
                     <tr v-else-if="!rows.length"><td :colspan="columns.length + 1" class="p-6 text-center text-slate-500">Belum ada data.</td></tr>
                     <tr v-for="row in rows" :key="row.id" class="border-t border-slate-100">
                       <td v-for="field in columns" :key="field[0]" class="max-w-xs whitespace-normal px-4 py-3">{{ row[field[0]] ?? '-' }}</td>
-                      <td class="whitespace-nowrap px-4 py-3"><button class="mr-3 font-semibold text-indigo-600" @click="edit(row)">Ubah</button><button class="font-semibold text-red-600" @click="remove(row)">Hapus</button></td>
+                      <td v-if="canWrite" class="whitespace-nowrap px-4 py-3">
+                        <button class="mr-3 font-semibold text-indigo-600" @click="edit(row)">Ubah</button>
+                        <button class="font-semibold text-red-600" @click="remove(row)">Hapus</button>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -552,8 +663,8 @@ onMounted(() => {
           </section>
         </div>
 
-        <!-- MANAGE USERS -->
-        <div v-if="currentPage === 'users'">
+        <!-- MANAGE USERS (hanya superadmin) -->
+        <div v-if="currentPage === 'users' && canManage">
           <div class="mb-6 flex items-center justify-between">
             <div>
               <p class="text-sm font-semibold uppercase tracking-widest text-indigo-600">Pengaturan</p>
@@ -622,7 +733,7 @@ onMounted(() => {
               </div>
               <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">{{ editingUser ? 'Password (kosongkan jika tidak diubah)' : 'Password' }}</label>
-                <input v-model="userForm.password" :type="'password'" :required="!editingUser" class="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" />
+                <input v-model="userForm.password" type="password" :required="!editingUser" class="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" />
               </div>
               <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">Role</label>
@@ -645,7 +756,7 @@ onMounted(() => {
     </div>
 
     <footer class="border-t border-slate-200 bg-white px-4 py-5 text-center text-sm text-slate-500 sm:px-8">
-      © {{ new Date().getFullYear() }} DNA Analysis — Vue 3, Tailwind CSS, dan Node.js.
+      &copy; {{ new Date().getFullYear() }} DNA Analysis &mdash; Vue 3, Tailwind CSS, dan Node.js.
     </footer>
   </div>
 </template>
