@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 
 const resources = {
   korban: {
@@ -111,6 +111,70 @@ const paginatedUsers = computed(() => {
   const start = (userPage.value - 1) * userPerPage.value
   return filteredUsers.value.slice(start, start + userPerPage.value)
 })
+
+const showAnalysis = ref(false)
+const analysisLoading = ref(false)
+const analysisRow = ref(null)
+const analysisNarrative = ref('')
+
+function generateNarrative(row, moduleKey) {
+  const now = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+  const name = row.nama || row.sample_name || '-'
+  const base = `Laporan hasil analisa ini dibuat pada tanggal ${now} oleh Sistem Prediksi DNA Test 54.`
+
+  if (moduleKey === 'korban') {
+    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Korban bernama ${row.nama}, berusia ${row.usia} tahun, berjenis kelamin ${row.jenis_kelamin}, mengalami kondisi kesehatan "${row.kondisi_kesehatan}" akibat ${row.jenis_bencana}. Berdasarkan perhitungan otomatis, korban memperoleh skor prioritas ${row.skor_prioritas} dengan kategori "${row.kategori_prioritas}". ${row.keterangan || ''} ${base}`
+  }
+  if (moduleKey === 'penyakit') {
+    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Pasien bernama ${row.nama}, berusia ${row.usia} tahun, berjenis kelamin ${row.jenis_kelamin}. Riwayat penyakit keluarga: ${row.riwayat_penyakit}. Jenis penyakit yang diduga: ${row.jenis_penyakit}. Berdasarkan analisa sekuens DNA, diperoleh rasio basa G sebesar ${(row.kemungkinan_kelainan_genetik * 100).toFixed(2)}%. Hasil skrining: ${row.hasil_skrining}. ${base}`
+  }
+  if (moduleKey === 'keturunan') {
+    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Subjek bernama ${row.nama}, berusia ${row.usia} tahun, berjenis kelamin ${row.jenis_kelamin}. Ayah: ${row.nama_ayah} (${row.genotipe_ayah}), Ibu: ${row.nama_ibu} (${row.genotipe_ibu}). Pola pewarisan: ${row.pola_pewarisan}. Berdasarkan diagram Punnett, probabilitas keturunan: Normal ${row.kemungkinan_normal}%, Carrier ${row.kemungkinan_carrier}%, Terdampak ${row.kemungkinan_terdampak}%. ${row.hasil_punnett || ''} ${base}`
+  }
+  if (moduleKey === 'pasangan') {
+    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Profil ${row.nama}, berusia ${row.umur} tahun. Hobi: ${row.hobi}. Pendidikan terakhir: ${row.pendidikan_terakhir}. Status hubungan: ${row.status_hubungan}. Berdasarkan analisa kompatibilitas genetik, diperoleh skor kecocokan ${row.skor_kecocokan}. Rekomendasi: ${row.rekomendasi}. ${base}`
+  }
+  if (moduleKey === 'penelitian') {
+    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Peneliti ${row.nama}, berusia ${row.usia} tahun, berjenis kelamin ${row.jenis_kelamin}. Judul penelitian: ${row.input_penelitian_ilmiah}. Berdasarkan analisa korelasi Pearson terhadap data X (${row.data_x}) dan data Y (${row.data_y}), diperoleh nilai korelasi sebesar ${row.korelasi?.toFixed(4) || '-'}. ${row.hasil_penelitian || ''} ${base}`
+  }
+  if (moduleKey === 'atletik') {
+    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Atlet ${row.nama}, berusia ${row.usia} tahun, berjenis kelamin ${row.jenis_kelamin}. Nilai awal: ${row.nilai_awal}, Nilai akhir: ${row.nilai_akhir}. Berdasarkan analisa peningkatan kinerja, tercatat peningkatan sebesar ${row.peningkatan_kinerja}% dari performa awal. ${base}`
+  }
+  if (moduleKey === 'variant') {
+    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Sampel ${row.sample_name} dengan gen ${row.gene} memiliki varian ${row.variant_notation} (${row.variant_type}). Coverage: ${row.coverage}x, Base Quality: ${row.base_quality}, MAF: ${row.maf}. Status Sanger: ${row.sanger_status}. Segregasi keluarga: ${row.segregation_status}. Kecocokan fenotipe: ${row.phenotype_match}. Skor bukti klinis: ${row.skor_bukti}. Status review: ${row.status_review}. ${row.klasifikasi_simulasi || ''} ${base}`
+  }
+  return base
+}
+
+async function startAnalysis(row) {
+  analysisRow.value = row
+  analysisLoading.value = true
+  showAnalysis.value = true
+  analysisNarrative.value = ''
+  document.getElementById('app')?.scrollTo({ top: 0 })
+  await new Promise(r => setTimeout(r, 1500))
+  analysisNarrative.value = generateNarrative(row, selected.value)
+  analysisLoading.value = false
+  await nextTick()
+  const el = document.getElementById('qrcode-signature')
+  if (el) {
+    el.innerHTML = ''
+    const data = `DNA-Analysis-54|${row.id || row.nama}|${new Date().toISOString()}`
+    QRCode.toCanvas(document.createElement('canvas'), data, { width: 100, margin: 1, color: { dark: '#4f46e5', light: '#ffffff' } }, (err, canvas) => {
+      if (!err && el) { el.appendChild(canvas) }
+    })
+  }
+}
+
+function closeAnalysis() {
+  showAnalysis.value = false
+  analysisRow.value = null
+  analysisNarrative.value = ''
+}
+
+function printAnalysis() {
+  window.print()
+}
 
 const canManage = computed(() => currentUser.value && currentUser.value.role === 'superadmin')
 const canWrite = computed(() => {
@@ -691,8 +755,12 @@ onMounted(() => {
                     <tr v-for="row in paginatedRows" :key="row.id" class="border-t border-slate-100 hover:bg-slate-50">
                       <td v-for="field in columns" :key="field[0]" class="max-w-xs whitespace-normal px-4 py-3">{{ row[field[0]] ?? '-' }}</td>
                       <td v-if="canWrite" class="whitespace-nowrap px-4 py-3">
-                        <button class="mr-3 font-semibold text-indigo-600" @click="edit(row)">Ubah</button>
+                        <button class="mr-2 font-semibold text-emerald-600" @click="startAnalysis(row)">Analisa</button>
+                        <button class="mr-2 font-semibold text-indigo-600" @click="edit(row)">Ubah</button>
                         <button class="font-semibold text-red-600" @click="remove(row)">Hapus</button>
+                      </td>
+                      <td v-else class="whitespace-nowrap px-4 py-3">
+                        <button class="font-semibold text-emerald-600" @click="startAnalysis(row)">Analisa</button>
                       </td>
                     </tr>
                   </tbody>
@@ -708,13 +776,134 @@ onMounted(() => {
                     <button v-else-if="Math.abs(p - tablePage) <= 2 || p === 1 || p === totalTablePages" @click="tablePage = p"
                       class="rounded px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-200">{{ p }}</button>
                     <span v-else-if="Math.abs(p - tablePage) === 3" class="px-1 text-xs text-slate-400">...</span>
-                  </template>
+</template>
+
+<style>
+.dna-loader {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.strand {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #818cf8;
+  animation: dna-bounce 0.6s ease-in-out infinite alternate;
+}
+.strand-right .dot {
+  background: #6366f1;
+}
+@keyframes dna-bounce {
+  0% { transform: translateX(-10px) scale(0.8); opacity: 0.5; }
+  100% { transform: translateX(10px) scale(1.2); opacity: 1; }
+}
+@media print {
+  .no-print { display: none !important; }
+  .dna-loader { display: none !important; }
+  body { background: white !important; }
+  .print\\:shadow-none { box-shadow: none !important; }
+  .print\\:border-0 { border: none !important; }
+}
+</style>
                   <button :disabled="tablePage >= totalTablePages" @click="tablePage++"
                     class="rounded px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-200 disabled:opacity-40">&raquo;</button>
                 </div>
               </div>
             </section>
           </section>
+        </div>
+
+        <!-- ANALYSIS LOADING SPINNER -->
+        <div v-if="analysisLoading" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm">
+          <div class="dna-loader mb-6">
+            <div class="strand strand-left">
+              <div v-for="n in 6" :key="'l'+n" class="dot" :style="{ animationDelay: (n * 0.15) + 's' }"></div>
+            </div>
+            <div class="strand strand-right">
+              <div v-for="n in 6" :key="'r'+n" class="dot" :style="{ animationDelay: (n * 0.15 + 0.075) + 's' }"></div>
+            </div>
+          </div>
+          <p class="text-lg font-bold text-indigo-700">Menganalisa data DNA...</p>
+          <p class="mt-1 text-sm text-slate-500">Sistem Prediksi DNA Test 54 sedang memproses</p>
+        </div>
+
+        <!-- ANALYSIS RESULTS PAGE -->
+        <div v-if="showAnalysis && !analysisLoading" class="mx-auto max-w-4xl">
+          <div class="mb-6 flex items-center justify-between no-print">
+            <button @click="closeAnalysis" class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
+              &larr; Kembali ke Tabel
+            </button>
+            <button @click="printAnalysis" class="flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-indigo-700 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+              Cetak Laporan
+            </button>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg print:shadow-none print:border-0">
+            <!-- Header -->
+            <div class="mb-8 flex items-start justify-between border-b border-slate-200 pb-6">
+              <div>
+                <div class="flex items-center gap-3 mb-1">
+                  <div class="grid h-10 w-10 place-items-center rounded-xl bg-indigo-600 font-bold text-white text-sm">DNA</div>
+                  <div>
+                    <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">LAPORAN HASIL ANALISA DNA</h1>
+                    <p class="text-xs font-medium text-indigo-600">Sistem Prediksi DNA Test 54</p>
+                  </div>
+                </div>
+              </div>
+              <div class="text-right text-xs text-slate-500">
+                <p class="font-semibold text-slate-700">No. Laporan: DNA-{{ new Date().getFullYear() }}-{{ String(analysisRow?.id || 0).padStart(4, '0') }}</p>
+                <p>Tanggal: {{ new Date().toLocaleDateString('id-ID', { year:'numeric', month:'long', day:'numeric' }) }}</p>
+              </div>
+            </div>
+
+            <!-- Narrative -->
+            <div class="mb-8">
+              <h2 class="mb-3 text-sm font-bold uppercase tracking-widest text-indigo-600">Hasil Analisa</h2>
+              <div class="rounded-xl bg-slate-50 border border-slate-200 p-6">
+                <p class="leading-relaxed text-slate-700 text-justify">{{ analysisNarrative }}</p>
+              </div>
+            </div>
+
+            <!-- Data Summary Table -->
+            <div class="mb-8">
+              <h2 class="mb-3 text-sm font-bold uppercase tracking-widest text-indigo-600">Ringkasan Data</h2>
+              <div class="overflow-hidden rounded-xl border border-slate-200">
+                <table class="w-full text-sm">
+                  <tbody>
+                    <tr v-for="(val, key) in analysisRow" :key="key" class="border-t border-slate-100">
+                      <td class="w-2/5 whitespace-nowrap bg-slate-50 px-4 py-2.5 font-semibold text-slate-600">{{ key.replace(/_/g, ' ') }}</td>
+                      <td class="px-4 py-2.5 text-slate-800">{{ val }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Signature -->
+            <div class="flex items-end justify-between border-t border-slate-200 pt-6">
+              <div class="text-xs text-slate-500">
+                <p class="font-semibold text-slate-700 mb-1">Dikeluarkan oleh:</p>
+                <p>DNA Analysis System v1.0</p>
+                <p>Sistem Prediksi DNA Test 54</p>
+              </div>
+              <div class="text-center">
+                <div id="qrcode-signature" class="mx-auto mb-1 flex items-center justify-center"></div>
+                <p class="text-[10px] font-medium text-slate-500">Tanda Tangan Digital</p>
+              </div>
+              <div class="text-right text-xs text-slate-500">
+                <p class="font-semibold text-slate-700 mb-1">{{ currentUser?.name }}</p>
+                <p>{{ currentUser?.role }}</p>
+                <p>{{ new Date().toLocaleDateString('id-ID') }}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- MANAGE USERS (hanya superadmin) -->
