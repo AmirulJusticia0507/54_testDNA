@@ -78,6 +78,39 @@ const form = reactive({})
 const config = computed(() => resources[selected.value])
 const columns = computed(() => [...config.value.fields, ...(config.value.results || [])])
 const menuLoading = ref(false)
+const searchQuery = ref('')
+const tablePage = ref(1)
+const perPage = ref(10)
+
+const filteredRows = computed(() => {
+  const q = searchQuery.value.toLowerCase().trim()
+  if (!q) return rows.value
+  return rows.value.filter(row =>
+    columns.value.some(([key]) => String(row[key] ?? '').toLowerCase().includes(q))
+  )
+})
+const totalTablePages = computed(() => Math.max(1, Math.ceil(filteredRows.value.length / perPage.value)))
+const paginatedRows = computed(() => {
+  const start = (tablePage.value - 1) * perPage.value
+  return filteredRows.value.slice(start, start + perPage.value)
+})
+
+const userSearchQuery = ref('')
+const userPage = ref(1)
+const userPerPage = ref(10)
+
+const filteredUsers = computed(() => {
+  const q = userSearchQuery.value.toLowerCase().trim()
+  if (!q) return usersList.value
+  return usersList.value.filter(u =>
+    [u.name, u.email, u.role].some(v => String(v).toLowerCase().includes(q))
+  )
+})
+const totalUserPages = computed(() => Math.max(1, Math.ceil(filteredUsers.value.length / userPerPage.value)))
+const paginatedUsers = computed(() => {
+  const start = (userPage.value - 1) * userPerPage.value
+  return filteredUsers.value.slice(start, start + userPerPage.value)
+})
 
 const canManage = computed(() => currentUser.value && currentUser.value.role === 'superadmin')
 const canWrite = computed(() => {
@@ -298,6 +331,8 @@ async function switchMenu(key) {
   menuLoading.value = true
   currentPage.value = 'dashboard'
   selected.value = key
+  searchQuery.value = ''
+  tablePage.value = 1
   resetForm()
   await load()
   setTimeout(() => { menuLoading.value = false }, 400)
@@ -636,7 +671,11 @@ onMounted(() => {
             <section class="overflow-hidden rounded-xl bg-white shadow-sm">
               <div class="flex items-center justify-between border-b p-5">
                 <h2 class="text-lg font-bold">Data {{ config.title }}</h2>
-                <button class="rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold" @click="load">Muat ulang</button>
+                <div class="flex items-center gap-3">
+                  <input v-model="searchQuery" @input="tablePage = 1" type="text" placeholder="Cari data..."
+                    class="w-48 rounded-lg border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" />
+                  <button class="rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold" @click="searchQuery = ''; tablePage = 1; load()">Muat ulang</button>
+                </div>
               </div>
               <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
@@ -648,8 +687,8 @@ onMounted(() => {
                   </thead>
                   <tbody>
                     <tr v-if="loading"><td :colspan="columns.length + 1" class="p-6 text-center text-slate-500">Memuat data...</td></tr>
-                    <tr v-else-if="!rows.length"><td :colspan="columns.length + 1" class="p-6 text-center text-slate-500">Belum ada data.</td></tr>
-                    <tr v-for="row in rows" :key="row.id" class="border-t border-slate-100">
+                    <tr v-else-if="!paginatedRows.length"><td :colspan="columns.length + 1" class="p-6 text-center text-slate-500">{{ searchQuery ? 'Data tidak ditemukan.' : 'Belum ada data.' }}</td></tr>
+                    <tr v-for="row in paginatedRows" :key="row.id" class="border-t border-slate-100 hover:bg-slate-50">
                       <td v-for="field in columns" :key="field[0]" class="max-w-xs whitespace-normal px-4 py-3">{{ row[field[0]] ?? '-' }}</td>
                       <td v-if="canWrite" class="whitespace-nowrap px-4 py-3">
                         <button class="mr-3 font-semibold text-indigo-600" @click="edit(row)">Ubah</button>
@@ -658,6 +697,21 @@ onMounted(() => {
                     </tr>
                   </tbody>
                 </table>
+              </div>
+              <div class="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-5 py-3">
+                <span class="text-xs text-slate-500">Menampilkan {{ paginatedRows.length }} dari {{ filteredRows.length }} data</span>
+                <div class="flex items-center gap-1">
+                  <button :disabled="tablePage <= 1" @click="tablePage--"
+                    class="rounded px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-200 disabled:opacity-40">&laquo;</button>
+                  <template v-for="p in totalTablePages" :key="p">
+                    <button v-if="p === tablePage" class="rounded bg-indigo-600 px-2.5 py-1 text-xs font-bold text-white">{{ p }}</button>
+                    <button v-else-if="Math.abs(p - tablePage) <= 2 || p === 1 || p === totalTablePages" @click="tablePage = p"
+                      class="rounded px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-200">{{ p }}</button>
+                    <span v-else-if="Math.abs(p - tablePage) === 3" class="px-1 text-xs text-slate-400">...</span>
+                  </template>
+                  <button :disabled="tablePage >= totalTablePages" @click="tablePage++"
+                    class="rounded px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-200 disabled:opacity-40">&raquo;</button>
+                </div>
               </div>
             </section>
           </section>
@@ -679,7 +733,11 @@ onMounted(() => {
           <section class="overflow-hidden rounded-xl bg-white shadow-sm">
             <div class="flex items-center justify-between border-b p-5">
               <h2 class="text-lg font-bold">Daftar Users</h2>
-              <button class="rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold" @click="loadUsers">Muat ulang</button>
+              <div class="flex items-center gap-3">
+                <input v-model="userSearchQuery" @input="userPage = 1" type="text" placeholder="Cari user..."
+                  class="w-48 rounded-lg border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" />
+                <button class="rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold" @click="userSearchQuery = ''; userPage = 1; loadUsers()">Muat ulang</button>
+              </div>
             </div>
             <div class="overflow-x-auto">
               <table class="w-full text-left text-sm">
@@ -694,8 +752,8 @@ onMounted(() => {
                 </thead>
                 <tbody>
                   <tr v-if="usersLoading"><td colspan="5" class="p-6 text-center text-slate-500">Memuat data...</td></tr>
-                  <tr v-else-if="!usersList.length"><td colspan="5" class="p-6 text-center text-slate-500">Belum ada user.</td></tr>
-                  <tr v-for="user in usersList" :key="user.id" class="border-t border-slate-100">
+                  <tr v-else-if="!paginatedUsers.length"><td colspan="5" class="p-6 text-center text-slate-500">{{ userSearchQuery ? 'User tidak ditemukan.' : 'Belum ada user.' }}</td></tr>
+                  <tr v-for="user in paginatedUsers" :key="user.id" class="border-t border-slate-100 hover:bg-slate-50">
                     <td class="px-4 py-3 font-medium">{{ user.name }}</td>
                     <td class="px-4 py-3 text-slate-600">{{ user.email }}</td>
                     <td class="px-4 py-3">
@@ -712,6 +770,21 @@ onMounted(() => {
                   </tr>
                 </tbody>
               </table>
+            </div>
+            <div class="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-5 py-3">
+              <span class="text-xs text-slate-500">Menampilkan {{ paginatedUsers.length }} dari {{ filteredUsers.length }} user</span>
+              <div class="flex items-center gap-1">
+                <button :disabled="userPage <= 1" @click="userPage--"
+                  class="rounded px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-200 disabled:opacity-40">&laquo;</button>
+                <template v-for="p in totalUserPages" :key="p">
+                  <button v-if="p === userPage" class="rounded bg-indigo-600 px-2.5 py-1 text-xs font-bold text-white">{{ p }}</button>
+                  <button v-else-if="Math.abs(p - userPage) <= 2 || p === 1 || p === totalUserPages" @click="userPage = p"
+                    class="rounded px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-200">{{ p }}</button>
+                  <span v-else-if="Math.abs(p - userPage) === 3" class="px-1 text-xs text-slate-400">...</span>
+                </template>
+                <button :disabled="userPage >= totalUserPages" @click="userPage++"
+                  class="rounded px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-200 disabled:opacity-40">&raquo;</button>
+              </div>
             </div>
           </section>
         </div>
