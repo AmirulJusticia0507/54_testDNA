@@ -9,4 +9,6 @@ module.exports = sequelize.define('User', {
   token_expiration: DataTypes.DATE,
   reset_token: DataTypes.STRING,
   reset_token_expiration: DataTypes.DATE,
+  login_attempts: { type: DataTypes.INTEGER, defaultValue: 0 },
+  locked_until: DataTypes.DATE,
 }, { tableName: 'users', createdAt: 'created_at', updatedAt: 'updated_at' });

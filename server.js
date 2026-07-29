@@ -27,8 +27,10 @@ app.get("/", (req, res) => {
     res.json({ status: "OK", service: "DNA Analysis API", version: "1.0.0" });
 });
 
+const LoginLog = require('./models/LoginLog');
+
 sequelize.authenticate()
-    .then(() => sequelize.sync({ alter: process.env.DB_SYNC_ALTER === 'true' }))
+    .then(() => sequelize.sync({ alter: true }))
     .then(() => console.log('Connected to MySQL database'))
     .catch((error) => console.error(`MySQL connection error: ${error.message}`));
 
