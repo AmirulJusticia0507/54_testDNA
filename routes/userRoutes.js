@@ -13,5 +13,7 @@ router.get('/', UserController.getAll);
 router.get('/:id', UserController.getById);
 router.put('/:id', UserController.update);
 router.delete('/:id', UserController.delete);
+router.post('/unlock/:id', UserController.unlock);
+router.get('/logs/:id', UserController.getLogs);
 
 module.exports = router;

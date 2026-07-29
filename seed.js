@@ -12,7 +12,7 @@ async function seed() {
     const hashedPassword = await bcrypt.hash('gedanggoreng', salt);
 
     const [user, created] = await User.findOrCreate({
-      where: { email: 'superadmmin@gmail.com' },
+      where: { email: 'superadmin@gmail.com' },
       defaults: {
         name: 'admin',
         password: hashedPassword,
@@ -26,7 +26,7 @@ async function seed() {
       console.log('User sudah ada, mengupdate password:');
       await user.update({ password: hashedPassword });
     }
-    console.log('  Email    : superadmmin@gmail.com');
+    console.log('  Email    : superadmin@gmail.com');
     console.log('  Password : gedanggoreng');
     console.log('  Role     : superadmin');
     console.log('  ID       :', user.id);
