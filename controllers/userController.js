@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const LoginLog = require('../models/LoginLog');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
@@ -39,10 +40,31 @@ userController.login = async (req, res) => {
             return res.status(400).json({ error: 'Email atau password salah' });
         }
 
-        const validPassword = await bcrypt.compare(req.body.password, user.password);
-        if (!validPassword) {
-            return res.status(400).json({ error: 'Email atau password salah' });
+        if (user.role !== 'superadmin') {
+            if (user.locked_until && new Date() < user.locked_until) {
+                const remaining = Math.ceil((user.locked_until - new Date()) / 60000);
+                return res.status(423).json({ error: `Akun terkunci. Coba lagi ${remaining} menit lagi.` });
+            }
+
+            const validPassword = await bcrypt.compare(req.body.password, user.password);
+            if (!validPassword) {
+                const attempts = (user.login_attempts || 0) + 1;
+                const updates = { login_attempts: attempts };
+                if (attempts >= 5) {
+                    updates.locked_until = new Date(Date.now() + 3 * 60 * 1000);
+                }
+                await user.update(updates);
+                return res.status(400).json({ error: 'Email atau password salah' });
+            }
+        } else {
+            const validPassword = await bcrypt.compare(req.body.password, user.password);
+            if (!validPassword) {
+                return res.status(400).json({ error: 'Email atau password salah' });
+            }
         }
+
+        await user.update({ login_attempts: 0, locked_until: null });
+        await LoginLog.create({ user_id: user.id, ip_address: req.ip, user_agent: req.headers['user-agent'] || '' });
 
         const token = jwt.sign({ id: user.id, role: user.role }, process.env.TOKEN_SECRET, { expiresIn: '24h' });
         res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
@@ -51,10 +73,36 @@ userController.login = async (req, res) => {
     }
 };
 
+// Get login logs
+userController.getLogs = async (req, res) => {
+    try {
+        const logs = await LoginLog.findAll({
+            where: { user_id: req.params.id },
+            order: [['logged_in_at', 'DESC']],
+            limit: 50,
+        });
+        res.json(logs);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Unlock user
+userController.unlock = async (req, res) => {
+    try {
+        const user = await User.findByPk(req.params.id);
+        if (!user) return res.status(404).json({ error: 'User tidak ditemukan' });
+        await user.update({ login_attempts: 0, locked_until: null });
+        res.json({ message: 'Akun berhasil dibuka' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // Get all users
 userController.getAll = async (req, res) => {
     try {
-        const users = await User.findAll({ attributes: { exclude: ['password', 'token', 'reset_token'] } });
+        const users = await User.findAll({ attributes: { exclude: ['password', 'token', 'reset_token', 'reset_token_expiration'] } });
         res.json(users);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -64,7 +112,7 @@ userController.getAll = async (req, res) => {
 // Get user by ID
 userController.getById = async (req, res) => {
     try {
-        const user = await User.findByPk(req.params.id, { attributes: { exclude: ['password', 'token', 'reset_token'] } });
+        const user = await User.findByPk(req.params.id, { attributes: { exclude: ['password', 'token', 'reset_token', 'reset_token_expiration'] } });
         if (!user) return res.status(404).json({ error: 'User tidak ditemukan' });
         res.json(user);
     } catch (error) {
