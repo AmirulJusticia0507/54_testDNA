@@ -104,12 +104,12 @@ export function useAnalysis(currentUser, selected) {
     signatureData.value = ''
   }
 
-  function confirmSignature() {
+  function confirmSignature(navigate) {
     const canvas = signatureCanvas.value
     if (!canvas) return
     signatureData.value = canvas.toDataURL('image/png')
     showSignatureModal.value = false
-    proceedAnalysis()
+    proceedAnalysis(navigate)
   }
 
   function startAnalysis(row) {
@@ -119,34 +119,22 @@ export function useAnalysis(currentUser, selected) {
     nextTick(() => initSignatureCanvas())
   }
 
-  async function proceedAnalysis(currentPage) {
+  async function proceedAnalysis(navigate) {
     const row = analysisRow.value
     analysisLoading.value = true
-    if (currentPage) currentPage.value = 'analysis'
     analysisNarrative.value = ''
     document.getElementById('app')?.scrollTo({ top: 0 })
     await new Promise(r => setTimeout(r, 1500))
     analysisNarrative.value = generateNarrative(row, selected.value)
     analysisLoading.value = false
-    await nextTick()
-    const el = document.getElementById('qrcode-signature')
-    if (el) {
-      el.innerHTML = ''
-      const signer = currentUser.value?.name || 'Unknown'
-      const timestamp = new Date().toISOString()
-      const reportNo = `DNA-${new Date().getFullYear()}-${String(row.id || 0).padStart(4, '0')}`
-      const qrText = `LAPORAN:${reportNo}|PERANGKAT:${signer}|WAKTU:${timestamp}|VERIFIKASI:VALID`
-      QRCode.toCanvas(document.createElement('canvas'), qrText, { width: 100, margin: 1, color: { dark: '#4f46e5', light: '#ffffff' } }, (err, canvas) => {
-        if (!err && el) { el.appendChild(canvas) }
-      })
-    }
+    if (navigate) navigate()
   }
 
-  function closeAnalysis(currentPage) {
+  function closeAnalysis(navigate) {
     showAnalysis.value = false
     analysisRow.value = null
     analysisNarrative.value = ''
-    if (currentPage) currentPage.value = 'dashboard'
+    if (navigate) navigate()
   }
 
   function printAnalysis() {

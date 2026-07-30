@@ -18,7 +18,7 @@ export function useUsers(authHeaders, parseResponse, messageFrom) {
     const q = userSearchQuery.value.toLowerCase().trim()
     if (!q) return usersList.value
     return usersList.value.filter(u =>
-      [u.name, u.email, u.role].some(v => String(v).toLowerCase().includes(q))
+      [u.name, u.email, u.role, String(u.login_attempts || 0), u.locked_until ? 'terkunci' : 'aktif'].some(v => String(v).toLowerCase().includes(q))
     )
   })
   const totalUserPages = computed(() => Math.max(1, Math.ceil(filteredUsers.value.length / userPerPage.value)))
@@ -101,10 +101,44 @@ export function useUsers(authHeaders, parseResponse, messageFrom) {
     }
   }
 
+  const showLogModal = ref(false)
+  const logUser = ref(null)
+  const loginLogs = ref([])
+  const logLoading = ref(false)
+
+  async function openLogModal(user) {
+    logUser.value = user
+    showLogModal.value = true
+    logLoading.value = true
+    try {
+      const response = await fetch(`/users/logs/${user.id}`, { headers: authHeaders() })
+      const data = await parseResponse(response)
+      if (!response.ok) throw new Error(data.error || 'Gagal mengambil log.')
+      loginLogs.value = data
+    } catch (err) {
+      userError.value = err.message
+      loginLogs.value = []
+    } finally {
+      logLoading.value = false
+    }
+  }
+
+  async function unlockUser(user) {
+    try {
+      const response = await fetch(`/users/unlock/${user.id}`, { method: 'POST', headers: authHeaders() })
+      const data = await parseResponse(response)
+      if (!response.ok) throw new Error(data.error || 'Gagal membuka akun.')
+      await loadUsers()
+    } catch (err) {
+      userError.value = err.message
+    }
+  }
+
   return {
     usersList, usersLoading, showUserModal, editingUser, userForm, userSaving, userError, userNotice,
     userSearchQuery, userPage, userPerPage,
     filteredUsers, totalUserPages, paginatedUsers,
-    loadUsers, openCreateUser, openEditUser, saveUser, deleteUser
+    loadUsers, openCreateUser, openEditUser, saveUser, deleteUser, unlockUser,
+    showLogModal, logUser, loginLogs, logLoading, openLogModal
   }
 }
