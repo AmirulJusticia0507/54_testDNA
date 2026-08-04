@@ -29,10 +29,16 @@ app.get("/", (req, res) => {
 
 const LoginLog = require('./models/LoginLog');
 
+console.log('Starting server...');
 sequelize.authenticate()
-    .then(() => sequelize.sync({ alter: true }))
-    .then(() => console.log('Connected to MySQL database'))
+    .then(() => {
+        console.log('Connected to MySQL database')
+    })
     .catch((error) => console.error(`MySQL connection error: ${error.message}`));
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
 
 app.use('/users', userRoutes);
 app.use('/korban-bencana', korbanBencanaRoutes);
