@@ -1,7 +1,8 @@
 <script setup>
-import { onMounted, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppState } from '../composables/useAppState'
+import DoctorSelector from '../components/DoctorSelector.vue'
 
 const router = useRouter()
 const { data, analysis } = useAppState()
@@ -15,6 +16,20 @@ const { startAnalysis } = analysis
 
 function handleAnalysis(row) {
   startAnalysis(row)
+}
+
+// Doctor selector state
+const showDoctorSelector = ref(false)
+const selectedPatient = ref(null)
+
+function openDoctorSelector(row) {
+  selectedPatient.value = row
+  showDoctorSelector.value = true
+}
+
+function onDoctorAssigned() {
+  showDoctorSelector.value = false
+  selectedPatient.value = null
 }
 
 watch(selected, () => { if (selected.value) { resetForm(); load() } })
@@ -77,11 +92,13 @@ onMounted(() => { load() })
                 <td v-for="field in columns" :key="field[0]" class="max-w-xs whitespace-normal px-4 py-3 text-slate-800 dark:text-slate-200">{{ row[field[0]] ?? '-' }}</td>
                 <td v-if="canWrite" class="whitespace-nowrap px-4 py-3">
                   <button class="mr-2 font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400" @click="handleAnalysis(row)">Analisa</button>
+                  <button v-if="row.external_id" class="mr-2 font-semibold text-purple-600 hover:text-purple-700 dark:text-purple-400" @click="openDoctorSelector(row)">Pilih Dokter</button>
                   <button class="mr-2 font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400" @click="edit(row)">Ubah</button>
                   <button class="font-semibold text-red-600 hover:text-red-700 dark:text-red-400" @click="remove(row)">Hapus</button>
                 </td>
                 <td v-else class="whitespace-nowrap px-4 py-3">
                   <button class="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400" @click="handleAnalysis(row)">Analisa</button>
+                  <button v-if="row.external_id" class="ml-2 font-semibold text-purple-600 hover:text-purple-700 dark:text-purple-400" @click="openDoctorSelector(row)">Pilih Dokter</button>
                 </td>
               </tr>
             </tbody>
@@ -104,5 +121,14 @@ onMounted(() => { load() })
         </div>
       </section>
     </section>
+
+    <!-- Doctor Selector Modal -->
+    <DoctorSelector
+      v-if="showDoctorSelector && selectedPatient"
+      :patientExternalId="selectedPatient.external_id"
+      :patientName="selectedPatient.nama || selectedPatient.sample_name || selectedPatient.name || ''"
+      @close="showDoctorSelector = false"
+      @assigned="onDoctorAssigned"
+    />
   </div>
 </template>

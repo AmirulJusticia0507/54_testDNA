@@ -30,8 +30,31 @@ async function getDoctorById(req, res) {
   }
 }
 
+async function getQueueEntryByExternalId(req, res) {
+  try {
+    const entry = await doctorService.getQueueEntryByExternalId(req.params.externalId);
+    if (!entry) return res.status(404).json({ message: 'Queue entry not found for this patient' });
+    res.json(entry);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+async function assignDoctor(req, res) {
+  try {
+    const { patientId, doctorId } = req.body;
+    if (!patientId || !doctorId) return res.status(400).json({ message: 'patientId and doctorId required' });
+    const entry = await doctorService.assignDoctor(patientId, doctorId);
+    res.json(entry);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   getAllDoctors,
   getDoctorByExternalId,
   getDoctorById,
+  getQueueEntryByExternalId,
+  assignDoctor,
 };
