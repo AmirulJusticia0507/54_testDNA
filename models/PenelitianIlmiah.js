@@ -5,4 +5,5 @@ module.exports = sequelize.define('PenelitianIlmiah', {
   input_penelitian_ilmiah: DataTypes.TEXT, hasil_penelitian: DataTypes.TEXT, korelasi: DataTypes.FLOAT,
   judul: DataTypes.STRING, penulis: DataTypes.STRING, tahun_terbit: DataTypes.INTEGER, penerbit: DataTypes.STRING, url: DataTypes.STRING,
   data_x: DataTypes.TEXT, data_y: DataTypes.TEXT,
+  external_id: { type: DataTypes.UUID, allowNull: true, unique: false, comment: 'Bridge ID for healthcare queue integration' },
 }, { tableName: 'penelitian_ilmiah' });
