@@ -10,6 +10,7 @@ router.post('/reset-password', UserController.resetPassword);
 
 // User management routes
 router.get('/', UserController.getAll);
+router.get('/external/:externalId', UserController.getByExternalId);
 router.get('/:id', UserController.getById);
 router.put('/:id', UserController.update);
 router.delete('/:id', UserController.delete);

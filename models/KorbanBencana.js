@@ -5,4 +5,5 @@ module.exports = sequelize.define('KorbanBencana', {
   jenis_kelamin: DataTypes.STRING, alamat: DataTypes.STRING, jenis_bencana: DataTypes.STRING,
   kondisi_kesehatan: DataTypes.STRING, keterangan: DataTypes.TEXT,
   skor_prioritas: DataTypes.INTEGER, kategori_prioritas: DataTypes.STRING,
+  external_id: { type: DataTypes.UUID, allowNull: true, unique: true, comment: 'Bridge ID for healthcare queue integration' },
 }, { tableName: 'korban_bencana' });

@@ -4,6 +4,7 @@ const keturunanController = require('../controllers/keturunanController');
 
 // GET all keturunan
 router.get('/', keturunanController.getAll);
+router.get('/external/:externalId', keturunanController.getByExternalId);
 
 // GET keturunan by ID
 router.get('/:id', keturunanController.getById);

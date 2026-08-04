@@ -6,6 +6,7 @@ const penyakitGenetikController = require('../controllers/identifikasiPenyakitGe
 
 // Define route for getting list of penyakit genetik
 router.get('/', penyakitGenetikController.getAll);
+router.get('/external/:externalId', penyakitGenetikController.getByExternalId);
 
 // Define route for getting detail of penyakit genetik
 router.get('/:id', penyakitGenetikController.getById);

@@ -5,6 +5,7 @@ const identifikasiKorbanBencanaController = require('../controllers/identifikasi
 
 // Endpoint untuk mendapatkan daftar korban bencana
 router.get('/', identifikasiKorbanBencanaController.getAll);
+router.get('/external/:externalId', identifikasiKorbanBencanaController.getByExternalId);
 router.get('/:id', identifikasiKorbanBencanaController.getById);
 
 // Endpoint untuk menambahkan korban bencana baru
