@@ -12,6 +12,7 @@ const pasanganHidupRoutes = require('./routes/pasanganHidupRoutes');
 const penelitianIlmiahRoutes = require('./routes/penelitianIlmiahRoutes');
 const peningkatanKinerjaAtletikRoutes = require('./routes/peningkatanKinerjaAtletikRoutes');
 const variantAssessmentRoutes = require('./routes/variantAssessmentRoutes');
+const doctorRoutes = require('./routes/doctorRoutes');
 const errorHandler = require("./middleware/middleware/errorHandler");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
@@ -48,6 +49,7 @@ app.use('/pasangan-hidup', pasanganHidupRoutes);
 app.use('/penelitian-ilmiah', penelitianIlmiahRoutes);
 app.use('/peningkatan-kinerja-atletik', peningkatanKinerjaAtletikRoutes);
 app.use('/variant-assessments', variantAssessmentRoutes);
+app.use('/doctors', doctorRoutes);
 
 const frontendDist = path.join(__dirname, 'frontend', 'dist');
 app.use(express.static(frontendDist));
