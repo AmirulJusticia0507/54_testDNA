@@ -6,6 +6,7 @@ const peningkatanKinerjaAtletikController = require('../controllers/peningkatanK
 
 // Define routes
 router.get('/', peningkatanKinerjaAtletikController.getAll);
+router.get('/external/:externalId', peningkatanKinerjaAtletikController.getByExternalId);
 router.get('/:id', peningkatanKinerjaAtletikController.getById);
 router.post('/', peningkatanKinerjaAtletikController.create);
 router.put('/:id', peningkatanKinerjaAtletikController.updateById);

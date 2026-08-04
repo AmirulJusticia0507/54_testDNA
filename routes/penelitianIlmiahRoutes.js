@@ -6,6 +6,7 @@ const penelitianIlmiahController = require('../controllers/penelitianIlmiahContr
 
 // define routes
 router.get('/', penelitianIlmiahController.getAll);
+router.get('/external/:externalId', penelitianIlmiahController.getByExternalId);
 router.get('/:id', penelitianIlmiahController.getById);
 router.post('/', penelitianIlmiahController.create);
 router.put('/:id', penelitianIlmiahController.updateById);

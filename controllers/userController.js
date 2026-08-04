@@ -188,4 +188,15 @@ userController.resetPassword = async (req, res) => {
     }
 };
 
+// Get user by external ID
+userController.getByExternalId = async (req, res) => {
+    try {
+        const user = await User.findOne({ where: { external_id: req.params.externalId }, attributes: { exclude: ['password', 'token', 'reset_token', 'reset_token_expiration'] } });
+        if (!user) return res.status(404).json({ error: 'User tidak ditemukan' });
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 module.exports = userController;

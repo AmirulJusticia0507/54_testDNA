@@ -3,6 +3,7 @@ const controller = require('../controllers/variantAssessmentController');
 const router = express.Router();
 
 router.get('/', controller.getAll);
+router.get('/external/:externalId', controller.getByExternalId);
 router.get('/:id', controller.getById);
 router.post('/', controller.create);
 router.put('/:id', controller.updateById);

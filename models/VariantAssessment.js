@@ -7,4 +7,5 @@ module.exports = sequelize.define('VariantAssessment', {
   coverage: DataTypes.FLOAT, base_quality: DataTypes.FLOAT, maf: DataTypes.FLOAT,
   sanger_status: DataTypes.STRING, segregation_status: DataTypes.STRING, phenotype_match: DataTypes.STRING,
   skor_bukti: DataTypes.INTEGER, status_review: DataTypes.STRING, klasifikasi_simulasi: DataTypes.TEXT,
+  external_id: { type: DataTypes.UUID, allowNull: true, unique: true, comment: 'Bridge ID for healthcare queue integration' },
 }, { tableName: 'variant_assessments' });
