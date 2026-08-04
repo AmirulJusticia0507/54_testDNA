@@ -50,9 +50,25 @@ jobs:
           repository: AmirulJusticia0507/healthcare-queue-scheduling-engine
           path: healthcare-queue-scheduling-engine
       - uses: docker/setup-buildx-action@v3
-      - name: Build & start compose
+      - name: Build & start DBs only
         run: |
-          docker compose build
+          docker compose up -d mysql postgres --wait --wait-timeout 60
+      - name: Run testDNA migration
+        run: |
+          docker compose run --rm -e DB_HOST=mysql -e DB_PORT=3306 \
+            -e DB_NAME=${MYSQL_DATABASE:-dna_analysis_db} \
+            -e DB_USER=${MYSQL_USER:-root} \
+            -e DB_PASSWORD=${MYSQL_PASSWORD:-password123} \
+            testdna node db/migrate.js
+      - name: Run healthcare migration
+        run: |
+          docker compose run --rm -e DB_HOST=postgres -e DB_PORT=5432 \
+            -e DB_NAME=${POSTGRES_DB:-healthcare_queue_db} \
+            -e DB_USER=${POSTGRES_USER:-postgres} \
+            -e DB_PASSWORD=${POSTGRES_PASSWORD:-postgres} \
+            healthcare-backend node db/migrate.js
+      - name: Build & start full compose
+        run: |
           docker compose up -d --wait --wait-timeout 180
           sleep 15
       - name: Smoke test DNA Analysis API
