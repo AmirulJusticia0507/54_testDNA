@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  testdna-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+      - run: npx eslint .
+        working-directory: .
+        continue-on-error: true
+
+  healthcare-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: AmirulJusticia0507/healthcare-queue-scheduling-engine
+          path: healthcare-queue-scheduling-engine
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install
+        working-directory: healthcare-queue-scheduling-engine/frontend
+      - run: npm run build
+        working-directory: healthcare-queue-scheduling-engine/frontend
+      - run: npx oxlint
+        working-directory: healthcare-queue-scheduling-engine/frontend
+
+  integration:
+    runs-on: ubuntu-latest
+    needs: [testdna-frontend, healthcare-frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: AmirulJusticia0507/healthcare-queue-scheduling-engine
+          path: healthcare-queue-scheduling-engine
+      - uses: docker/setup-buildx-action@v3
+      - name: Build & start compose
+        run: |
+          docker compose build
+          docker compose up -d --wait --wait-timeout 180
+          sleep 15
+      - name: Smoke test DNA Analysis API
+        run: |
+          echo "--- / (DNA SPA) ---"
+          curl -fsS -o /dev/null -w "status=%{http_code}\n" http://localhost/
+          echo "--- /api-docs ---"
+          curl -fsS -o /dev/null -w "status=%{http_code}\n" http://localhost/api-docs
+          echo "--- /users ---"
+          curl -fsS -o /dev/null -w "status=%{http_code}\n" http://localhost/users
+      - name: Smoke test Healthcare Queue
+        run: |
+          echo "--- /queue/ (Healthcare SPA) ---"
+          curl -fsS -o /dev/null -w "status=%{http_code}\n" http://localhost/queue/
+          echo "--- /queue/api/clinics ---"
+          curl -fsS http://localhost/queue/api/clinics
+          echo "--- /queue/api/auth/login ---"
+          curl -fsS -X POST http://localhost/queue/api/auth/login \
+            -H 'content-type:application/json' \
+            -d '{"email":"admin@health.id","password":"admin123"}'
+          echo "--- /queue/api/queue/current ---"
+          curl -fsS http://localhost/queue/api/queue/current
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
