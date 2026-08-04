@@ -11,5 +11,5 @@ module.exports = sequelize.define('User', {
   reset_token_expiration: DataTypes.DATE,
   login_attempts: { type: DataTypes.INTEGER, defaultValue: 0 },
   locked_until: DataTypes.DATE,
-  external_id: { type: DataTypes.UUID, allowNull: true, unique: true, comment: 'Bridge ID for healthcare queue integration' },
+  external_id: { type: DataTypes.UUID, allowNull: true, comment: 'Bridge ID for healthcare queue integration' },
 }, { tableName: 'users', createdAt: 'created_at', updatedAt: 'updated_at' });

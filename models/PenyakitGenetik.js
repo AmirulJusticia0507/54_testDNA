@@ -5,5 +5,5 @@ module.exports = sequelize.define('PenyakitGenetik', {
   riwayat_penyakit: DataTypes.TEXT, jenis_penyakit: DataTypes.STRING,
   input_identifikasi_penyakit_genetik: DataTypes.TEXT, kemungkinan_kelainan_genetik: DataTypes.FLOAT,
   hasil_skrining: DataTypes.TEXT,
-  external_id: { type: DataTypes.UUID, allowNull: true, unique: true, comment: 'Bridge ID for healthcare queue integration' },
+  external_id: { type: DataTypes.UUID, allowNull: true, unique: false, comment: 'Bridge ID for healthcare queue integration' },
 }, { tableName: 'penyakit_genetik' });
