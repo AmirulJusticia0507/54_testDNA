@@ -39,8 +39,35 @@ async function getDoctorById(id) {
   }
 }
 
+async function getQueueEntryByExternalId(externalId) {
+  try {
+    const res = await axios.get(`${HEALTHCARE_API_BASE}/api/doctors/queue/external/${externalId}`, {
+      timeout: 5000,
+    });
+    return res.data;
+  } catch (err) {
+    if (err.response && err.response.status === 404) return null;
+    console.error('Doctor service error (getQueueEntry):', err.message);
+    return null;
+  }
+}
+
+async function assignDoctor(patientId, doctorId) {
+  try {
+    const res = await axios.patch(`${HEALTHCARE_API_BASE}/api/doctors/assign/${patientId}`, { doctorId }, {
+      timeout: 5000,
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Doctor service error (assign):', err.message);
+    throw err;
+  }
+}
+
 module.exports = {
   getAllDoctors,
   getDoctorByExternalId,
   getDoctorById,
+  getQueueEntryByExternalId,
+  assignDoctor,
 };

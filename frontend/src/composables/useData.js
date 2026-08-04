@@ -7,7 +7,7 @@ const resources = {
     fields: [
       ['nama', 'Nama', 'text'], ['umur', 'Umur', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
       ['kondisi_kesehatan', 'Kondisi kesehatan', 'text'], ['jenis_bencana', 'Jenis bencana', 'text']
-    ], results: [['skor_prioritas', 'Skor prioritas'], ['kategori_prioritas', 'Kategori']]
+    ], results: [['skor_prioritas', 'Skor prioritas'], ['kategori_prioritas', 'Kategori'], ['external_id', 'External ID']]
   },
   penyakit: {
     title: 'Penyakit Genetik', endpoint: '/penyakit-genetik',
@@ -15,7 +15,7 @@ const resources = {
     fields: [
       ['nama', 'Nama', 'text'], ['usia', 'Usia', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
       ['riwayat_penyakit', 'Riwayat penyakit', 'text'], ['jenis_penyakit', 'Jenis penyakit', 'text'], ['input_identifikasi_penyakit_genetik', 'Sekuens DNA (A/C/G/T)', 'text']
-    ], results: [['kemungkinan_kelainan_genetik', 'Rasio G'], ['hasil_skrining', 'Hasil skrining']]
+    ], results: [['kemungkinan_kelainan_genetik', 'Rasio G'], ['hasil_skrining', 'Hasil skrining'], ['external_id', 'External ID']]
   },
   keturunan: {
     title: 'Keturunan', endpoint: '/keturunan',
@@ -24,7 +24,7 @@ const resources = {
       ['nama', 'Nama', 'text'], ['usia', 'Usia', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
       ['nama_ayah', 'Nama ayah', 'text'], ['nama_ibu', 'Nama ibu', 'text'], ['pola_pewarisan', 'Pola pewarisan', 'text', 'Autosomal dominan / Autosomal resesif / X-linked recessive'],
       ['jenis_kelamin_anak', 'Jenis kelamin anak', 'text', 'Laki-laki / Perempuan'], ['genotipe_ayah', 'Genotipe ayah', 'text', 'AA/Aa/aa atau XAY/XaY'], ['genotipe_ibu', 'Genotipe ibu', 'text', 'AA/Aa/aa atau XAXA/XAXa/XaXa']
-    ], results: [['kemungkinan_normal', 'Normal (%)'], ['kemungkinan_carrier', 'Carrier (%)'], ['kemungkinan_terdampak', 'Terdampak (%)'], ['hasil_punnett', 'Hasil Mendel']]
+    ], results: [['kemungkinan_normal', 'Normal (%)'], ['kemungkinan_carrier', 'Carrier (%)'], ['kemungkinan_terdampak', 'Terdampak (%)'], ['hasil_punnett', 'Hasil Mendel'], ['external_id', 'External ID']]
   },
   pasangan: {
     title: 'Pasangan Hidup', endpoint: '/pasangan-hidup',
@@ -32,7 +32,7 @@ const resources = {
     fields: [
       ['nama', 'Nama', 'text'], ['umur', 'Umur', 'number'], ['hobi', 'Hobi', 'text'],
       ['pendidikan_terakhir', 'Pendidikan terakhir', 'text'], ['status_hubungan', 'Status hubungan', 'text']
-    ], results: [['skor_kecocokan', 'Skor kecocokan'], ['rekomendasi', 'Rekomendasi']]
+    ], results: [['skor_kecocokan', 'Skor kecocokan'], ['rekomendasi', 'Rekomendasi'], ['external_id', 'External ID']]
   },
   penelitian: {
     title: 'Penelitian Ilmiah', endpoint: '/penelitian-ilmiah',
@@ -40,7 +40,7 @@ const resources = {
     fields: [
       ['nama', 'Nama', 'text'], ['usia', 'Usia', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
       ['input_penelitian_ilmiah', 'Judul/data penelitian', 'text'], ['data_x', 'Data X (pisahkan koma)', 'text'], ['data_y', 'Data Y (pisahkan koma)', 'text']
-    ], results: [['korelasi', 'Korelasi Pearson'], ['hasil_penelitian', 'Hasil']]
+    ], results: [['korelasi', 'Korelasi Pearson'], ['hasil_penelitian', 'Hasil'], ['external_id', 'External ID']]
   },
   atletik: {
     title: 'Kinerja Atletik', endpoint: '/peningkatan-kinerja-atletik',
@@ -48,7 +48,7 @@ const resources = {
     fields: [
       ['nama', 'Nama', 'text'], ['usia', 'Usia', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
       ['nilai_awal', 'Nilai awal', 'number'], ['nilai_akhir', 'Nilai akhir', 'number']
-    ], results: [['peningkatan_kinerja', 'Peningkatan (%)']]
+    ], results: [['peningkatan_kinerja', 'Peningkatan (%)'], ['external_id', 'External ID']]
   },
   variant: {
     title: 'Variant Assessment', endpoint: '/variant-assessments',
@@ -57,7 +57,7 @@ const resources = {
       ['sample_name', 'Nama sampel', 'text'], ['gene', 'Gen', 'text'], ['variant_notation', 'Notasi varian', 'text', 'Contoh: c.123A>G'], ['variant_type', 'Tipe varian', 'text'],
       ['coverage', 'Coverage', 'number'], ['base_quality', 'Base quality', 'number'], ['maf', 'MAF (0-1)', 'number'],
       ['sanger_status', 'Status Sanger', 'text', 'Terkonfirmasi / Tidak terkonfirmasi / Belum diuji'], ['segregation_status', 'Segregasi keluarga', 'text', 'De novo / Cosegregate / Belum diuji'], ['phenotype_match', 'Kecocokan fenotipe', 'text', 'Sesuai / Tidak sesuai / Belum dinilai']
-    ], results: [['skor_bukti', 'Skor bukti'], ['status_review', 'Status review'], ['klasifikasi_simulasi', 'Catatan']]
+    ], results: [['skor_bukti', 'Skor bukti'], ['status_review', 'Status review'], ['klasifikasi_simulasi', 'Catatan'], ['external_id', 'External ID']]
   }
 }
 
