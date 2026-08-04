@@ -1,12 +1,18 @@
 const axios = require('axios');
 
 const HEALTHCARE_API_BASE = process.env.HEALTHCARE_API_BASE || 'http://localhost:5000';
+const INTEGRATION_API_KEY = process.env.INTEGRATION_API_KEY;
+
+function integrationHeaders() {
+  return INTEGRATION_API_KEY ? { 'X-API-Key': INTEGRATION_API_KEY } : {};
+}
 
 async function getAllDoctors(clinicId) {
   try {
     const params = clinicId ? { clinic: clinicId } : {};
     const res = await axios.get(`${HEALTHCARE_API_BASE}/api/doctors`, {
       params,
+      headers: integrationHeaders(),
       timeout: 5000,
     });
     return res.data;
@@ -19,6 +25,7 @@ async function getAllDoctors(clinicId) {
 async function getDoctorByExternalId(externalId) {
   try {
     const res = await axios.get(`${HEALTHCARE_API_BASE}/api/doctors/external/${externalId}`, {
+      headers: integrationHeaders(),
       timeout: 5000,
     });
     return res.data;
@@ -42,6 +49,7 @@ async function getDoctorById(id) {
 async function getQueueEntryByExternalId(externalId) {
   try {
     const res = await axios.get(`${HEALTHCARE_API_BASE}/api/doctors/queue/external/${externalId}`, {
+      headers: integrationHeaders(),
       timeout: 5000,
     });
     return res.data;
@@ -55,6 +63,7 @@ async function getQueueEntryByExternalId(externalId) {
 async function assignDoctor(patientId, doctorId) {
   try {
     const res = await axios.patch(`${HEALTHCARE_API_BASE}/api/doctors/assign/${patientId}`, { doctorId }, {
+      headers: integrationHeaders(),
       timeout: 5000,
     });
     return res.data;
