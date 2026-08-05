@@ -13,7 +13,8 @@ export default defineConfig({
       '/penelitian-ilmiah': 'http://localhost:3000',
       '/peningkatan-kinerja-atletik': 'http://localhost:3000',
       '/variant-assessments': 'http://localhost:3000',
-      '/doctors': 'http://localhost:3000'
+      '/doctors': 'http://localhost:3000',
+      '/patients': 'http://localhost:3000'
     }
   }
 })
