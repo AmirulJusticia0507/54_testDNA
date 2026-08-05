@@ -1,31 +1,32 @@
 import { nextTick, ref } from 'vue'
 
-function generateNarrative(row, moduleKey) {
+function generateNarrative(row, moduleKey, doctorName) {
   const now = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
   const base = `Laporan hasil analisa ini dibuat pada tanggal ${now} oleh Sistem Prediksi DNA Test 54.`
+  const doctorInfo = doctorName ? ` Dokter yang menangani: ${doctorName}.` : ''
 
   if (moduleKey === 'korban') {
-    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Korban bernama ${row.nama}, berusia ${row.usia} tahun, berjenis kelamin ${row.jenis_kelamin}, mengalami kondisi kesehatan "${row.kondisi_kesehatan}" akibat ${row.jenis_bencana}. Berdasarkan perhitungan otomatis, korban memperoleh skor prioritas ${row.skor_prioritas} dengan kategori "${row.kategori_prioritas}". ${row.keterangan || ''} ${base}`
+    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Korban bernama ${row.nama}, berusia ${row.usia} tahun, berjenis kelamin ${row.jenis_kelamin}, mengalami kondisi kesehatan "${row.kondisi_kesehatan}" akibat ${row.jenis_bencana}. Berdasarkan perhitungan otomatis, korban memperoleh skor prioritas ${row.skor_prioritas} dengan kategori "${row.kategori_prioritas}". ${row.keterangan || ''}${doctorInfo} ${base}`
   }
   if (moduleKey === 'penyakit') {
-    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Pasien bernama ${row.nama}, berusia ${row.usia} tahun, berjenis kelamin ${row.jenis_kelamin}. Riwayat penyakit keluarga: ${row.riwayat_penyakit}. Jenis penyakit yang diduga: ${row.jenis_penyakit}. Berdasarkan analisa sekuens DNA, diperoleh rasio basa G sebesar ${(row.kemungkinan_kelainan_genetik * 100).toFixed(2)}%. Hasil skrining: ${row.hasil_skrining}. ${base}`
+    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Pasien bernama ${row.nama}, berusia ${row.usia} tahun, berjenis kelamin ${row.jenis_kelamin}. Riwayat penyakit keluarga: ${row.riwayat_penyakit}. Jenis penyakit yang diduga: ${row.jenis_penyakit}. Berdasarkan analisa sekuens DNA, diperoleh rasio basa G sebesar ${(row.kemungkinan_kelainan_genetik * 100).toFixed(2)}%. Hasil skrining: ${row.hasil_skrining}.${doctorInfo} ${base}`
   }
   if (moduleKey === 'keturunan') {
-    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Subjek bernama ${row.nama}, berusia ${row.usia} tahun, berjenis kelamin ${row.jenis_kelamin}. Ayah: ${row.nama_ayah} (${row.genotipe_ayah}), Ibu: ${row.nama_ibu} (${row.genotipe_ibu}). Pola pewarisan: ${row.pola_pewarisan}. Berdasarkan diagram Punnett, probabilitas keturunan: Normal ${row.kemungkinan_normal}%, Carrier ${row.kemungkinan_carrier}%, Terdampak ${row.kemungkinan_terdampak}%. ${row.hasil_punnett || ''} ${base}`
+    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Subjek bernama ${row.nama}, berusia ${row.usia} tahun, berjenis kelamin ${row.jenis_kelamin}. Ayah: ${row.nama_ayah} (${row.genotipe_ayah}), Ibu: ${row.nama_ibu} (${row.genotipe_ibu}). Pola pewarisan: ${row.pola_pewarisan}. Berdasarkan diagram Punnett, probabilitas keturunan: Normal ${row.kemungkinan_normal}%, Carrier ${row.kemungkinan_carrier}%, Terdampak ${row.kemungkinan_terdampak}%. ${row.hasil_punnett || ''}${doctorInfo} ${base}`
   }
   if (moduleKey === 'pasangan') {
-    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Profil ${row.nama}, berusia ${row.umur} tahun. Hobi: ${row.hobi}. Pendidikan terakhir: ${row.pendidikan_terakhir}. Status hubungan: ${row.status_hubungan}. Berdasarkan analisa kompatibilitas genetik, diperoleh skor kecocokan ${row.skor_kecocokan}. Rekomendasi: ${row.rekomendasi}. ${base}`
+    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Profil ${row.nama}, berusia ${row.umur} tahun. Hobi: ${row.hobi}. Pendidikan terakhir: ${row.pendidikan_terakhir}. Status hubungan: ${row.status_hubungan}. Berdasarkan analisa kompatibilitas genetik, diperoleh skor kecocokan ${row.skor_kecocokan}. Rekomendasi: ${row.rekomendasi}.${doctorInfo} ${base}`
   }
   if (moduleKey === 'penelitian') {
-    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Peneliti ${row.nama}, berusia ${row.usia} tahun, berjenis kelamin ${row.jenis_kelamin}. Judul penelitian: ${row.input_penelitian_ilmiah}. Berdasarkan analisa korelasi Pearson terhadap data X (${row.data_x}) dan data Y (${row.data_y}), diperoleh nilai korelasi sebesar ${row.korelasi?.toFixed(4) || '-'}. ${row.hasil_penelitian || ''} ${base}`
+    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Peneliti ${row.nama}, berusia ${row.usia} tahun, berjenis kelamin ${row.jenis_kelamin}. Judul penelitian: ${row.input_penelitian_ilmiah}. Berdasarkan analisa korelasi Pearson terhadap data X (${row.data_x}) dan data Y (${row.data_y}), diperoleh nilai korelasi sebesar ${row.korelasi?.toFixed(4) || '-'}. ${row.hasil_penelitian || ''}${doctorInfo} ${base}`
   }
   if (moduleKey === 'atletik') {
-    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Atlet ${row.nama}, berusia ${row.usia} tahun, berjenis kelamin ${row.jenis_kelamin}. Nilai awal: ${row.nilai_awal}, Nilai akhir: ${row.nilai_akhir}. Berdasarkan analisa peningkatan kinerja, tercatat peningkatan sebesar ${row.peningkatan_kinerja}% dari performa awal. ${base}`
+    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Atlet ${row.nama}, berusia ${row.usia} tahun, berjenis kelamin ${row.jenis_kelamin}. Nilai awal: ${row.nilai_awal}, Nilai akhir: ${row.nilai_akhir}. Berdasarkan analisa peningkatan kinerja, tercatat peningkatan sebesar ${row.peningkatan_kinerja}% dari performa awal.${doctorInfo} ${base}`
   }
   if (moduleKey === 'variant') {
-    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Sampel ${row.sample_name} dengan gen ${row.gene} memiliki varian ${row.variant_notation} (${row.variant_type}). Coverage: ${row.coverage}x, Base Quality: ${row.base_quality}, MAF: ${row.maf}. Status Sanger: ${row.sanger_status}. Segregasi keluarga: ${row.segregation_status}. Kecocokan fenotipe: ${row.phenotype_match}. Skor bukti klinis: ${row.skor_bukti}. Status review: ${row.status_review}. ${row.klasifikasi_simulasi || ''} ${base}`
+    return `Menurut hasil analisa Prediction System DNA Test 54 adalah seperti berikut: Sampel ${row.sample_name} dengan gen ${row.gene} memiliki varian ${row.variant_notation} (${row.variant_type}). Coverage: ${row.coverage}x, Base Quality: ${row.base_quality}, MAF: ${row.maf}. Status Sanger: ${row.sanger_status}. Segregasi keluarga: ${row.segregation_status}. Kecocokan fenotipe: ${row.phenotype_match}. Skor bukti klinis: ${row.skor_bukti}. Status review: ${row.status_review}. ${row.klasifikasi_simulasi || ''}${doctorInfo} ${base}`
   }
-  return base
+  return base + doctorInfo
 }
 
 export function useAnalysis(currentUser, selected) {
@@ -124,8 +125,27 @@ export function useAnalysis(currentUser, selected) {
     analysisLoading.value = true
     analysisNarrative.value = ''
     document.getElementById('app')?.scrollTo({ top: 0 })
+
+    // Fetch doctor name if row has external_id
+    let doctorName = null
+    if (row.external_id) {
+      try {
+        const queueRes = await fetch(`/doctors/queue/external/${row.external_id}`)
+        if (queueRes.ok) {
+          const queueData = await queueRes.json()
+          if (queueData.doctor_id) {
+            const docRes = await fetch(`/doctors/${queueData.doctor_id}`)
+            if (docRes.ok) {
+              const docData = await docRes.json()
+              doctorName = docData.name
+            }
+          }
+        }
+      } catch { /* ignore */ }
+    }
+
     await new Promise(r => setTimeout(r, 1500))
-    analysisNarrative.value = generateNarrative(row, selected.value)
+    analysisNarrative.value = generateNarrative(row, selected.value, doctorName)
     analysisLoading.value = false
     if (navigate) navigate()
   }
