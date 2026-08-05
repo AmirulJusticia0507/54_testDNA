@@ -18,11 +18,23 @@ const integrationRoutes = require('./routes/integrationRoutes');
 const errorHandler = require("./middleware/middleware/errorHandler");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
+const { requestLogger } = require('./middleware/logger');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(requestLogger);
+
+// Health check
+app.get('/health', async (req, res) => {
+  try {
+    await sequelize.authenticate();
+    res.json({ status: 'ok', service: 'dna-analysis-backend', db: 'connected', timestamp: new Date().toISOString() });
+  } catch (err) {
+    res.status(503).json({ status: 'error', service: 'dna-analysis-backend', db: 'disconnected', error: err.message });
+  }
+});
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
