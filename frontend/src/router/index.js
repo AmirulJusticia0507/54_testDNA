@@ -6,6 +6,7 @@ import AuthLayout from '../layouts/AuthLayout.vue'
 import Dashboard from '../views/Dashboard.vue'
 import Users from '../views/Users.vue'
 import Analysis from '../views/Analysis.vue'
+import AdminDashboard from '../components/AdminDashboard.vue'
 
 const { token } = useAuth()
 
@@ -20,6 +21,7 @@ const routes = [
       { path: 'dashboard', name: 'dashboard', component: Dashboard },
       { path: 'users', name: 'users', component: Users },
       { path: 'analysis', name: 'analysis', component: Analysis },
+      { path: 'admin', name: 'admin-dashboard', component: AdminDashboard },
     ]
   }
 ]
