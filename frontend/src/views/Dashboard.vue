@@ -2,10 +2,14 @@
 import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppState } from '../composables/useAppState'
+import { usePatients } from '../composables/usePatients'
 import DoctorSelector from '../components/DoctorSelector.vue'
+import Charts from '../components/Charts.vue'
+import BulkImport from '../components/BulkImport.vue'
 
 const router = useRouter()
 const { data, analysis } = useAppState()
+const { getPatientByExternalId } = usePatients()
 
 const { selected, rows, loading, saving, error, notice, editingId, form,
   config, columns, searchQuery, tablePage, perPage,
@@ -32,6 +36,31 @@ function onDoctorAssigned() {
   selectedPatient.value = null
 }
 
+// Patient info from healthcare
+const patientInfo = ref(null)
+const patientInfoLoading = ref(false)
+
+async function showPatientInfo(row) {
+  if (!row.external_id) return
+  patientInfoLoading.value = true
+  patientInfo.value = null
+  try {
+    patientInfo.value = await getPatientByExternalId(row.external_id)
+  } catch {
+    patientInfo.value = null
+  } finally {
+    patientInfoLoading.value = false
+  }
+}
+
+function hidePatientInfo() {
+  patientInfo.value = null
+}
+
+// Toggle panels
+const showCharts = ref(false)
+const showImport = ref(false)
+
 watch(selected, () => { if (selected.value) { resetForm(); load() } })
 onMounted(() => { load() })
 </script>
@@ -47,6 +76,28 @@ onMounted(() => { load() })
 
     <div v-if="error" class="mb-5 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 p-4 text-red-700 dark:text-red-300">{{ error }}</div>
     <div v-if="notice" class="mb-5 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 p-4 text-emerald-700 dark:text-emerald-300">{{ notice }}</div>
+
+    <!-- Toggle buttons -->
+    <div class="mb-4 flex gap-2">
+      <button @click="showCharts = !showCharts" class="rounded-lg px-3 py-1.5 text-xs font-semibold transition"
+        :class="showCharts ? 'bg-indigo-100 text-indigo-700' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 border border-slate-200 dark:border-slate-600'">
+        {{ showCharts ? 'Tutup Grafik' : 'Tampilkan Grafik' }}
+      </button>
+      <button v-if="canWrite" @click="showImport = !showImport" class="rounded-lg px-3 py-1.5 text-xs font-semibold transition"
+        :class="showImport ? 'bg-indigo-100 text-indigo-700' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 border border-slate-200 dark:border-slate-600'">
+        {{ showImport ? 'Tutup Import' : 'Import CSV' }}
+      </button>
+    </div>
+
+    <!-- Charts panel -->
+    <div v-if="showCharts" class="mb-6">
+      <Charts :rows="rows" :columns="columns" :title="'Visualisasi ' + config.title" />
+    </div>
+
+    <!-- Bulk Import panel -->
+    <div v-if="showImport && canWrite" class="mb-6">
+      <BulkImport :endpoint="config.endpoint" :fields="config.fields" :label="config.title" @imported="load" />
+    </div>
 
     <section :class="canWrite ? 'grid gap-6 xl:grid-cols-[380px_1fr]' : ''">
       <!-- FORM (hanya untuk admin & superadmin) -->
@@ -93,12 +144,14 @@ onMounted(() => { load() })
                 <td v-if="canWrite" class="whitespace-nowrap px-4 py-3">
                   <button class="mr-2 font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400" @click="handleAnalysis(row)">Analisa</button>
                   <button v-if="row.external_id" class="mr-2 font-semibold text-purple-600 hover:text-purple-700 dark:text-purple-400" @click="openDoctorSelector(row)">Pilih Dokter</button>
+                  <button v-if="row.external_id" class="mr-2 font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400" @click="showPatientInfo(row)">Info Pasien</button>
                   <button class="mr-2 font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400" @click="edit(row)">Ubah</button>
                   <button class="font-semibold text-red-600 hover:text-red-700 dark:text-red-400" @click="remove(row)">Hapus</button>
                 </td>
                 <td v-else class="whitespace-nowrap px-4 py-3">
                   <button class="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400" @click="handleAnalysis(row)">Analisa</button>
                   <button v-if="row.external_id" class="ml-2 font-semibold text-purple-600 hover:text-purple-700 dark:text-purple-400" @click="openDoctorSelector(row)">Pilih Dokter</button>
+                  <button v-if="row.external_id" class="ml-2 font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400" @click="showPatientInfo(row)">Info Pasien</button>
                 </td>
               </tr>
             </tbody>
@@ -121,6 +174,27 @@ onMounted(() => { load() })
         </div>
       </section>
     </section>
+
+    <!-- Patient Info Panel (from Healthcare) -->
+    <div v-if="patientInfoLoading" class="mt-4 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/30 p-4">
+      <p class="text-sm text-blue-700 dark:text-blue-300">Memuat info pasien dari Healthcare...</p>
+    </div>
+    <div v-else-if="patientInfo" class="mt-4 rounded-xl border border-blue-200 dark:border-blue-800 bg-white dark:bg-slate-800 p-5 shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-sm font-bold text-blue-800 dark:text-blue-200">Info Pasien (Healthcare)</h3>
+        <button @click="hidePatientInfo" class="text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">Tutup</button>
+      </div>
+      <div class="grid grid-cols-2 gap-3 text-sm">
+        <div><span class="text-slate-500 dark:text-slate-400">Nama:</span> <span class="font-medium text-slate-800 dark:text-slate-200">{{ patientInfo.name || '-' }}</span></div>
+        <div><span class="text-slate-500 dark:text-slate-400">No. RM:</span> <span class="font-medium text-slate-800 dark:text-slate-200">{{ patientInfo.medical_record_number || '-' }}</span></div>
+        <div><span class="text-slate-500 dark:text-slate-400">Jenis Kelamin:</span> <span class="font-medium text-slate-800 dark:text-slate-200">{{ patientInfo.gender === 'P' ? 'Perempuan' : 'Laki-laki' }}</span></div>
+        <div><span class="text-slate-500 dark:text-slate-400">Tgl Lahir:</span> <span class="font-medium text-slate-800 dark:text-slate-200">{{ patientInfo.date_of_birth || '-' }}</span></div>
+        <div><span class="text-slate-500 dark:text-slate-400">Telepon:</span> <span class="font-medium text-slate-800 dark:text-slate-200">{{ patientInfo.phone || '-' }}</span></div>
+        <div><span class="text-slate-500 dark:text-slate-400">Email:</span> <span class="font-medium text-slate-800 dark:text-slate-200">{{ patientInfo.email || '-' }}</span></div>
+        <div class="col-span-2"><span class="text-slate-500 dark:text-slate-400">Alamat:</span> <span class="font-medium text-slate-800 dark:text-slate-200">{{ patientInfo.address || '-' }}</span></div>
+        <div><span class="text-slate-500 dark:text-slate-400">External ID:</span> <span class="font-mono text-xs text-slate-600 dark:text-slate-300">{{ patientInfo.external_id || '-' }}</span></div>
+      </div>
+    </div>
 
     <!-- Doctor Selector Modal -->
     <DoctorSelector
