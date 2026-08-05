@@ -6,6 +6,7 @@ import { usePatients } from '../composables/usePatients'
 import DoctorSelector from '../components/DoctorSelector.vue'
 import Charts from '../components/Charts.vue'
 import BulkImport from '../components/BulkImport.vue'
+import PatientCompare from '../components/PatientCompare.vue'
 
 const router = useRouter()
 const { data, analysis } = useAppState()
@@ -14,7 +15,7 @@ const { getPatientByExternalId } = usePatients()
 const { selected, rows, loading, saving, error, notice, editingId, form,
   config, columns, searchQuery, tablePage, perPage,
   filteredRows, totalTablePages, paginatedRows,
-  canWrite, resetForm, load, edit, submit, remove, switchMenu } = data
+  canWrite, resetForm, load, edit, submit, remove, switchMenu, exportCsv, fieldFilters } = data
 
 const { startAnalysis } = analysis
 
@@ -57,9 +58,27 @@ function hidePatientInfo() {
   patientInfo.value = null
 }
 
+// Patient comparison
+const showCompare = ref(false)
+const compareRows = ref([])
+
+function toggleCompare(row) {
+  const idx = compareRows.value.findIndex(r => r.id === row.id)
+  if (idx >= 0) {
+    compareRows.value.splice(idx, 1)
+  } else if (compareRows.value.length < 4) {
+    compareRows.value.push(row)
+  }
+}
+
+function isInCompare(row) {
+  return compareRows.value.some(r => r.id === row.id)
+}
+
 // Toggle panels
 const showCharts = ref(false)
 const showImport = ref(false)
+const showFilters = ref(false)
 
 watch(selected, () => { if (selected.value) { resetForm(); load() } })
 onMounted(() => { load() })
@@ -78,7 +97,7 @@ onMounted(() => { load() })
     <div v-if="notice" class="mb-5 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 p-4 text-emerald-700 dark:text-emerald-300">{{ notice }}</div>
 
     <!-- Toggle buttons -->
-    <div class="mb-4 flex gap-2">
+    <div class="mb-4 flex gap-2 flex-wrap">
       <button @click="showCharts = !showCharts" class="rounded-lg px-3 py-1.5 text-xs font-semibold transition"
         :class="showCharts ? 'bg-indigo-100 text-indigo-700' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 border border-slate-200 dark:border-slate-600'">
         {{ showCharts ? 'Tutup Grafik' : 'Tampilkan Grafik' }}
@@ -87,6 +106,31 @@ onMounted(() => { load() })
         :class="showImport ? 'bg-indigo-100 text-indigo-700' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 border border-slate-200 dark:border-slate-600'">
         {{ showImport ? 'Tutup Import' : 'Import CSV' }}
       </button>
+      <button @click="exportCsv" class="rounded-lg px-3 py-1.5 text-xs font-semibold bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 border border-slate-200 dark:border-slate-600 transition">
+        Export CSV
+      </button>
+      <button @click="showFilters = !showFilters" class="rounded-lg px-3 py-1.5 text-xs font-semibold transition"
+        :class="showFilters ? 'bg-indigo-100 text-indigo-700' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 border border-slate-200 dark:border-slate-600'">
+        {{ showFilters ? 'Tutup Filter' : 'Filter Lanjutan' }}
+      </button>
+      <button v-if="compareRows.length >= 2" @click="showCompare = true" class="rounded-lg px-3 py-1.5 text-xs font-semibold bg-purple-100 text-purple-700 transition">
+        Bandingkan ({{ compareRows.length }})
+      </button>
+    </div>
+
+    <!-- Advanced Filters -->
+    <div v-if="showFilters && config.filterFields?.length" class="mb-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 p-4">
+      <h3 class="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3">Filter Lanjutan</h3>
+      <div class="flex gap-3 flex-wrap">
+        <div v-for="ff in config.filterFields" :key="ff.key">
+          <label class="block text-[10px] text-slate-500 dark:text-slate-400 mb-1">{{ ff.label }}</label>
+          <select v-if="ff.options" v-model="fieldFilters[ff.key]" class="rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-2 py-1 text-xs">
+            <option value="">Semua</option>
+            <option v-for="opt in ff.options" :key="opt" :value="opt">{{ opt }}</option>
+          </select>
+          <input v-else v-model="fieldFilters[ff.key]" class="rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-2 py-1 text-xs" />
+        </div>
+      </div>
     </div>
 
     <!-- Charts panel -->
@@ -146,12 +190,18 @@ onMounted(() => { load() })
                   <button v-if="row.external_id" class="mr-2 font-semibold text-purple-600 hover:text-purple-700 dark:text-purple-400" @click="openDoctorSelector(row)">Pilih Dokter</button>
                   <button v-if="row.external_id" class="mr-2 font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400" @click="showPatientInfo(row)">Info Pasien</button>
                   <button class="mr-2 font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400" @click="edit(row)">Ubah</button>
-                  <button class="font-semibold text-red-600 hover:text-red-700 dark:text-red-400" @click="remove(row)">Hapus</button>
+                  <button class="mr-2 font-semibold text-red-600 hover:text-red-700 dark:text-red-400" @click="remove(row)">Hapus</button>
+                  <button @click="toggleCompare(row)" class="text-xs font-semibold px-1 py-0.5 rounded transition" :class="isInCompare(row) ? 'bg-purple-100 text-purple-700' : 'text-slate-400 hover:text-slate-600'">
+                    {{ isInCompare(row) ? '✓' : 'Compare' }}
+                  </button>
                 </td>
                 <td v-else class="whitespace-nowrap px-4 py-3">
                   <button class="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400" @click="handleAnalysis(row)">Analisa</button>
                   <button v-if="row.external_id" class="ml-2 font-semibold text-purple-600 hover:text-purple-700 dark:text-purple-400" @click="openDoctorSelector(row)">Pilih Dokter</button>
                   <button v-if="row.external_id" class="ml-2 font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400" @click="showPatientInfo(row)">Info Pasien</button>
+                  <button @click="toggleCompare(row)" class="ml-2 text-xs font-semibold px-1 py-0.5 rounded transition" :class="isInCompare(row) ? 'bg-purple-100 text-purple-700' : 'text-slate-400 hover:text-slate-600'">
+                    {{ isInCompare(row) ? '✓' : 'Compare' }}
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -195,6 +245,9 @@ onMounted(() => { load() })
         <div><span class="text-slate-500 dark:text-slate-400">External ID:</span> <span class="font-mono text-xs text-slate-600 dark:text-slate-300">{{ patientInfo.external_id || '-' }}</span></div>
       </div>
     </div>
+
+    <!-- Patient Compare Modal -->
+    <PatientCompare v-if="showCompare" :rows="compareRows" :columns="columns" @close="showCompare = false" />
 
     <!-- Doctor Selector Modal -->
     <DoctorSelector

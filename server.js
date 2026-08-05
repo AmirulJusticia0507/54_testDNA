@@ -14,6 +14,7 @@ const peningkatanKinerjaAtletikRoutes = require('./routes/peningkatanKinerjaAtle
 const variantAssessmentRoutes = require('./routes/variantAssessmentRoutes');
 const doctorRoutes = require('./routes/doctorRoutes');
 const patientRoutes = require('./routes/patientRoutes');
+const integrationRoutes = require('./routes/integrationRoutes');
 const errorHandler = require("./middleware/middleware/errorHandler");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
@@ -52,6 +53,7 @@ app.use('/peningkatan-kinerja-atletik', peningkatanKinerjaAtletikRoutes);
 app.use('/variant-assessments', variantAssessmentRoutes);
 app.use('/doctors', doctorRoutes);
 app.use('/patients', patientRoutes);
+app.use('/integration', integrationRoutes);
 
 const frontendDist = path.join(__dirname, 'frontend', 'dist');
 app.use(express.static(frontendDist));

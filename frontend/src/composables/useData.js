@@ -7,7 +7,8 @@ const resources = {
     fields: [
       ['nama', 'Nama', 'text'], ['umur', 'Umur', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
       ['kondisi_kesehatan', 'Kondisi kesehatan', 'text'], ['jenis_bencana', 'Jenis bencana', 'text']
-    ], results: [['skor_prioritas', 'Skor prioritas'], ['kategori_prioritas', 'Kategori'], ['external_id', 'External ID']]
+    ], results: [['skor_prioritas', 'Skor prioritas'], ['kategori_prioritas', 'Kategori'], ['external_id', 'External ID']],
+    filterFields: [{ key: 'jenis_kelamin', label: 'Jenis Kelamin', options: ['Laki-laki', 'Perempuan'] }, { key: 'jenis_bencana', label: 'Jenis Bencana' }]
   },
   penyakit: {
     title: 'Penyakit Genetik', endpoint: '/penyakit-genetik',
@@ -15,7 +16,8 @@ const resources = {
     fields: [
       ['nama', 'Nama', 'text'], ['usia', 'Usia', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
       ['riwayat_penyakit', 'Riwayat penyakit', 'text'], ['jenis_penyakit', 'Jenis penyakit', 'text'], ['input_identifikasi_penyakit_genetik', 'Sekuens DNA (A/C/G/T)', 'text']
-    ], results: [['kemungkinan_kelainan_genetik', 'Rasio G'], ['hasil_skrining', 'Hasil skrining'], ['external_id', 'External ID']]
+    ], results: [['kemungkinan_kelainan_genetik', 'Rasio G'], ['hasil_skrining', 'Hasil skrining'], ['external_id', 'External ID']],
+    filterFields: [{ key: 'jenis_kelamin', label: 'Jenis Kelamin', options: ['Laki-laki', 'Perempuan'] }]
   },
   keturunan: {
     title: 'Keturunan', endpoint: '/keturunan',
@@ -24,7 +26,8 @@ const resources = {
       ['nama', 'Nama', 'text'], ['usia', 'Usia', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
       ['nama_ayah', 'Nama ayah', 'text'], ['nama_ibu', 'Nama ibu', 'text'], ['pola_pewarisan', 'Pola pewarisan', 'text', 'Autosomal dominan / Autosomal resesif / X-linked recessive'],
       ['jenis_kelamin_anak', 'Jenis kelamin anak', 'text', 'Laki-laki / Perempuan'], ['genotipe_ayah', 'Genotipe ayah', 'text', 'AA/Aa/aa atau XAY/XaY'], ['genotipe_ibu', 'Genotipe ibu', 'text', 'AA/Aa/aa atau XAXA/XAXa/XaXa']
-    ], results: [['kemungkinan_normal', 'Normal (%)'], ['kemungkinan_carrier', 'Carrier (%)'], ['kemungkinan_terdampak', 'Terdampak (%)'], ['hasil_punnett', 'Hasil Mendel'], ['external_id', 'External ID']]
+    ], results: [['kemungkinan_normal', 'Normal (%)'], ['kemungkinan_carrier', 'Carrier (%)'], ['kemungkinan_terdampak', 'Terdampak (%)'], ['hasil_punnett', 'Hasil Mendel'], ['external_id', 'External ID']],
+    filterFields: [{ key: 'jenis_kelamin', label: 'Jenis Kelamin', options: ['Laki-laki', 'Perempuan'] }]
   },
   pasangan: {
     title: 'Pasangan Hidup', endpoint: '/pasangan-hidup',
@@ -32,7 +35,8 @@ const resources = {
     fields: [
       ['nama', 'Nama', 'text'], ['umur', 'Umur', 'number'], ['hobi', 'Hobi', 'text'],
       ['pendidikan_terakhir', 'Pendidikan terakhir', 'text'], ['status_hubungan', 'Status hubungan', 'text']
-    ], results: [['skor_kecocokan', 'Skor kecocokan'], ['rekomendasi', 'Rekomendasi'], ['external_id', 'External ID']]
+    ], results: [['skor_kecocokan', 'Skor kecocokan'], ['rekomendasi', 'Rekomendasi'], ['external_id', 'External ID']],
+    filterFields: []
   },
   penelitian: {
     title: 'Penelitian Ilmiah', endpoint: '/penelitian-ilmiah',
@@ -40,7 +44,8 @@ const resources = {
     fields: [
       ['nama', 'Nama', 'text'], ['usia', 'Usia', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
       ['input_penelitian_ilmiah', 'Judul/data penelitian', 'text'], ['data_x', 'Data X (pisahkan koma)', 'text'], ['data_y', 'Data Y (pisahkan koma)', 'text']
-    ], results: [['korelasi', 'Korelasi Pearson'], ['hasil_penelitian', 'Hasil'], ['external_id', 'External ID']]
+    ], results: [['korelasi', 'Korelasi Pearson'], ['hasil_penelitian', 'Hasil'], ['external_id', 'External ID']],
+    filterFields: [{ key: 'jenis_kelamin', label: 'Jenis Kelamin', options: ['Laki-laki', 'Perempuan'] }]
   },
   atletik: {
     title: 'Kinerja Atletik', endpoint: '/peningkatan-kinerja-atletik',
@@ -48,7 +53,8 @@ const resources = {
     fields: [
       ['nama', 'Nama', 'text'], ['usia', 'Usia', 'number'], ['jenis_kelamin', 'Jenis kelamin', 'text'],
       ['nilai_awal', 'Nilai awal', 'number'], ['nilai_akhir', 'Nilai akhir', 'number']
-    ], results: [['peningkatan_kinerja', 'Peningkatan (%)'], ['external_id', 'External ID']]
+    ], results: [['peningkatan_kinerja', 'Peningkatan (%)'], ['external_id', 'External ID']],
+    filterFields: [{ key: 'jenis_kelamin', label: 'Jenis Kelamin', options: ['Laki-laki', 'Perempuan'] }]
   },
   variant: {
     title: 'Variant Assessment', endpoint: '/variant-assessments',
@@ -57,7 +63,8 @@ const resources = {
       ['sample_name', 'Nama sampel', 'text'], ['gene', 'Gen', 'text'], ['variant_notation', 'Notasi varian', 'text', 'Contoh: c.123A>G'], ['variant_type', 'Tipe varian', 'text'],
       ['coverage', 'Coverage', 'number'], ['base_quality', 'Base quality', 'number'], ['maf', 'MAF (0-1)', 'number'],
       ['sanger_status', 'Status Sanger', 'text', 'Terkonfirmasi / Tidak terkonfirmasi / Belum diuji'], ['segregation_status', 'Segregasi keluarga', 'text', 'De novo / Cosegregate / Belum diuji'], ['phenotype_match', 'Kecocokan fenotipe', 'text', 'Sesuai / Tidak sesuai / Belum dinilai']
-    ], results: [['skor_bukti', 'Skor bukti'], ['status_review', 'Status review'], ['klasifikasi_simulasi', 'Catatan'], ['external_id', 'External ID']]
+    ], results: [['skor_bukti', 'Skor bukti'], ['status_review', 'Status review'], ['klasifikasi_simulasi', 'Catatan'], ['external_id', 'External ID']],
+    filterFields: [{ key: 'sanger_status', label: 'Status Sanger', options: ['Terkonfirmasi', 'Tidak terkonfirmasi', 'Belum diuji'] }]
   }
 }
 
@@ -77,15 +84,31 @@ export function useData(currentUser) {
   const tablePage = ref(1)
   const perPage = ref(10)
 
+  // Advanced filtering
+  const fieldFilters = reactive({})
+
   const config = computed(() => resources[selected.value])
   const columns = computed(() => [...config.value.fields, ...(config.value.results || [])])
 
   const filteredRows = computed(() => {
+    let result = rows.value
+
+    // Text search
     const q = searchQuery.value.toLowerCase().trim()
-    if (!q) return rows.value
-    return rows.value.filter(row =>
-      columns.value.some(([key]) => String(row[key] ?? '').toLowerCase().includes(q))
-    )
+    if (q) {
+      result = result.filter(row =>
+        columns.value.some(([key]) => String(row[key] ?? '').toLowerCase().includes(q))
+      )
+    }
+
+    // Field filters
+    for (const [key, val] of Object.entries(fieldFilters)) {
+      if (val && val !== '') {
+        result = result.filter(row => String(row[key] ?? '').toLowerCase() === String(val).toLowerCase())
+      }
+    }
+
+    return result
   })
   const totalTablePages = computed(() => Math.max(1, Math.ceil(filteredRows.value.length / perPage.value)))
   const paginatedRows = computed(() => {
@@ -136,7 +159,28 @@ export function useData(currentUser) {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  function validateForm() {
+    for (const [key, label, type] of config.value.fields) {
+      if (['nama', 'sample_name', 'gene', 'variant_notation'].includes(key) && !form[key]?.trim()) {
+        return `${label} wajib diisi`
+      }
+      if (type === 'number' && form[key] !== '' && form[key] !== undefined) {
+        const num = Number(form[key])
+        if (isNaN(num)) return `${label} harus berupa angka`
+        if (key === 'usia' && (num < 0 || num > 150)) return `${label} harus antara 0-150`
+        if (key === 'maf' && (num < 0 || num > 1)) return `${label} harus antara 0-1`
+      }
+      if (key === 'input_identifikasi_penyakit_genetik' && form[key]) {
+        if (!/^[ACGT]+$/.test(form[key].toUpperCase())) return 'Sekuens DNA hanya boleh mengandung A, C, G, T'
+      }
+    }
+    return null
+  }
+
   async function submit() {
+    const validationError = validateForm()
+    if (validationError) { error.value = validationError; return }
+
     saving.value = true
     error.value = ''
     notice.value = ''
@@ -184,9 +228,25 @@ export function useData(currentUser) {
     selected.value = key
     searchQuery.value = ''
     tablePage.value = 1
+    Object.keys(fieldFilters).forEach(k => delete fieldFilters[k])
     resetForm()
     await load()
     setTimeout(() => { menuLoading.value = false }, 400)
+  }
+
+  // Export CSV
+  function exportCsv() {
+    const data = filteredRows.value
+    if (!data.length) return
+    const allKeys = columns.value.map(([k]) => k)
+    const header = columns.value.map(([, l]) => l).join(',')
+    const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`
+    const csv = [header, ...data.map(row => allKeys.map(k => esc(row[k])).join(','))].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = `${config.value.title.toLowerCase().replace(/\s+/g, '-')}.csv`; a.click()
+    URL.revokeObjectURL(url)
   }
 
   watch(selected, () => { resetForm(); load() })
@@ -197,6 +257,7 @@ export function useData(currentUser) {
     config, columns, menuLoading, searchQuery, tablePage, perPage,
     filteredRows, totalTablePages, paginatedRows,
     canManage, canWrite, visibleResources,
-    resetForm, load, edit, submit, remove, switchMenu
+    fieldFilters,
+    resetForm, load, edit, submit, remove, switchMenu, exportCsv
   }
 }
