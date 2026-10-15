@@ -5,8 +5,6 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-password123}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-dna_analysis_db}
-      MYSQL_USER: ${MYSQL_USER:-root}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password123}
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
@@ -55,6 +53,10 @@ services:
       context: ../healthcare-queue-scheduling-engine/backend
       dockerfile: Dockerfile
     restart: unless-stopped
+    networks:
+      default:
+        aliases:
+          - backend
     env_file:
       - path: ../healthcare-queue-scheduling-engine/backend/.env
         required: false

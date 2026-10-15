@@ -10,6 +10,6 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --omit=dev
 COPY . .
-COPY --from=frontend /app/frontend/dist ./frontend/dist
+COPY --from=frontend /app/dist ./frontend/dist
 EXPOSE 3000
 CMD ["node", "server.js"]
