@@ -42,6 +42,7 @@ services:
       DB_NAME: ${MYSQL_DATABASE:-dna_analysis_db}
       DB_USER: ${MYSQL_USER:-root}
       DB_PASSWORD: ${MYSQL_PASSWORD:-password123}
+      HEALTHCARE_API_BASE: http://healthcare-backend:5000
     depends_on:
       mysql:
         condition: service_healthy
@@ -66,6 +67,9 @@ services:
       DB_USER: ${POSTGRES_USER:-postgres}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       DB_NAME: ${POSTGRES_DB:-healthcare_queue_db}
+      DNA_API_BASE: http://testdna:3000
+      TESTDNA_API_BASE: http://testdna:3000
+      HEALTHCARE_API_BASE: http://healthcare-backend:5000
     depends_on:
       postgres:
         condition: service_healthy
