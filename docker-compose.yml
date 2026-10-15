@@ -52,13 +52,18 @@ services:
 
   healthcare-backend:
     build:
-      context: ../healthcare-queue-scheduling-engine
-      dockerfile: backend/Dockerfile
+      context: ../healthcare-queue-scheduling-engine/backend
+      dockerfile: Dockerfile
     restart: unless-stopped
-    env_file: ../healthcare-queue-scheduling-engine/backend/.env
+    env_file:
+      - path: ../healthcare-queue-scheduling-engine/backend/.env
+        required: false
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DB_NAME: ${POSTGRES_DB:-healthcare_queue_db}
     depends_on:
       postgres:
         condition: service_healthy
@@ -68,8 +73,8 @@ services:
 
   healthcare-frontend:
     build:
-      context: ../healthcare-queue-scheduling-engine
-      dockerfile: frontend/Dockerfile
+      context: ../healthcare-queue-scheduling-engine/frontend
+      dockerfile: Dockerfile
       args:
         VITE_BASE: /queue/
         VITE_API_BASE: /queue/api
