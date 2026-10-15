@@ -15,6 +15,7 @@ const variantAssessmentRoutes = require('./routes/variantAssessmentRoutes');
 const doctorRoutes = require('./routes/doctorRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const integrationRoutes = require('./routes/integrationRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 const errorHandler = require("./middleware/middleware/errorHandler");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
@@ -66,6 +67,7 @@ app.use('/variant-assessments', variantAssessmentRoutes);
 app.use('/doctors', doctorRoutes);
 app.use('/patients', patientRoutes);
 app.use('/integration', integrationRoutes);
+app.use('/ai', aiRoutes);
 
 const frontendDist = path.join(__dirname, 'frontend', 'dist');
 app.use(express.static(frontendDist));

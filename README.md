@@ -69,6 +69,17 @@ DB_USER=root
 DB_PASSWORD=password123
 TOKEN_SECRET=ganti-dengan-rahasia-yang-aman
 DB_SYNC_ALTER=true
+
+# Integrasi Healthcare Queue (opsional)
+HEALTHCARE_API_BASE=http://localhost:5000
+INTEGRATION_API_KEY=your-integration-api-key-here
+
+# AI / LLM (OpenAI-compatible via griphubrouter)
+AI_BASE_URL=https://griphubrouter.web.id/v1
+AI_API_KEY=YOUR_API_KEY
+AI_MODEL=llama-4-scout-17b-16e-instruct
+AI_TEMPERATURE=0.2
+AI_TIMEOUT=60000
 ```
 
 Buat user MySQL untuk koneksi TCP (karena MySQL 8.4 menghapus `mysql_native_password`):
